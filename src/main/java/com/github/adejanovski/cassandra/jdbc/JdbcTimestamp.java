@@ -15,24 +15,28 @@
 package com.github.adejanovski.cassandra.jdbc;
 
 import java.nio.ByteBuffer;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Date;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+public class JdbcTimestamp extends AbstractJdbcType<Timestamp> {
 
-    JdbcDouble() {
+    public static final JdbcTimestamp instance = new JdbcTimestamp();
+
+    JdbcTimestamp() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(Timestamp obj) {
+        return -1;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
+    public int getPrecision(Timestamp obj) {
+        // format is always 'yyyy-mm-ddThh:mm:ss[.SSSSSS][-xxxx]'
+        return (obj == null) ? 31 : toString(obj).length();
     }
 
     public boolean isCurrency() {
@@ -40,11 +44,11 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
     }
 
     public boolean isSigned() {
-        return true;
+        return false;
     }
 
-    public String toString(Double obj) {
-        return (obj == null) ? null : obj.toString();
+    public String toString(Timestamp obj) {
+        return Utils.formatTimestamp(obj);
     }
 
     public boolean needsQuotes() {
@@ -56,25 +60,26 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
             return null;
         } else if (bytes.remaining() != 8) {
             throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
+                    "A timestamp is exactly 8 bytes (stored as a long): " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        // uses ISO-8601 formatted string
+        return Utils.formatDate(new Date(bytes.getLong(bytes.position())));
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class<Timestamp> getType() {
+        return Timestamp.class;
     }
 
     public int getJdbcType() {
-        return Types.DOUBLE;
+        return Types.TIMESTAMP;
     }
 
-    public Double compose(Object value) {
-        return (Double) value;
+    public Timestamp compose(Object value) {
+        return (Timestamp) value;
     }
 
-    public Object decompose(Double value) {
+    public Object decompose(Timestamp value) {
         return value;
     }
 }

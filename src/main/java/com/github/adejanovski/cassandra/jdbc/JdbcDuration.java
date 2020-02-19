@@ -15,66 +15,57 @@
 package com.github.adejanovski.cassandra.jdbc;
 
 import java.nio.ByteBuffer;
-import java.sql.Types;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+// FIXME - ...
+// Durations are internally 3 ints. CqlDuration?
+public class JdbcDuration extends JdbcOther {
 
-    JdbcDouble() {
+    public static final JdbcDuration instance = new JdbcDuration();
+
+    JdbcDuration() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(String obj) {
+        return -1;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
-    }
-
-    public boolean isCurrency() {
-        return false;
+    public int getPrecision(String obj) {
+        return -1;
     }
 
     public boolean isSigned() {
-        return true;
-    }
-
-    public String toString(Double obj) {
-        return (obj == null) ? null : obj.toString();
+        return false;
     }
 
     public boolean needsQuotes() {
-        return false;
+        return true;
     }
 
     public String getString(ByteBuffer bytes) {
         if ((bytes == null) || !bytes.hasRemaining()) {
             return null;
-        } else if (bytes.remaining() != 8) {
+        } else if (bytes.remaining() != 12) {
+            // three ints, or an int and two longs?
             throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
+                    "A duration is exactly 12 bytes (stored as three ints): " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        // uses ISO-8601 formatted string
+        // may be able to use datastax duration class
+        return "UNIMPLEMENTED";
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public String compose(Object value) {
+        // this is where datastax duration is converted to string
+        return (value == null) ? null : value.toString();
     }
 
-    public int getJdbcType() {
-        return Types.DOUBLE;
-    }
-
-    public Double compose(Object value) {
-        return (Double) value;
-    }
-
-    public Object decompose(Double value) {
+    public Object decompose(String value) {
+        // this is where string is converted to datastax duration
         return value;
     }
 }

@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.util.Date;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.UUID;
 
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.DataType.Name;
+import com.datastax.driver.core.Duration;
 import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.exceptions.DriverInternalError;
@@ -19,70 +22,59 @@ import com.google.common.collect.Maps;
 
 public enum DataTypeEnum {
 
-    ASCII(1, String.class, DataType.Name.ASCII), BIGINT(2, Long.class, DataType.Name.BIGINT), BLOB(
-            3, ByteBuffer.class, DataType.Name.BLOB), BOOLEAN(4, Boolean.class,
-                    DataType.Name.BOOLEAN), COUNTER(5, Long.class, DataType.Name.COUNTER), DECIMAL(
-                            6, BigDecimal.class, DataType.Name.DECIMAL), DOUBLE(7, Double.class,
-                                    DataType.Name.DOUBLE), FLOAT(8, Float.class,
-                                            DataType.Name.FLOAT), INET(16, InetAddress.class,
-                                                    DataType.Name.INET), INT(9, Integer.class,
-                                                            DataType.Name.INT), TEXT(10,
-                                                                    String.class,
-                                                                    DataType.Name.TEXT), TIMESTAMP(
-                                                                            11, Date.class,
-                                                                            DataType.Name.TIMESTAMP), UUID(
-                                                                                    12, UUID.class,
-                                                                                    DataType.Name.UUID), VARCHAR(
-                                                                                            13,
-                                                                                            String.class,
-                                                                                            DataType.Name.VARCHAR), VARINT(
-                                                                                                    14,
-                                                                                                    BigInteger.class,
-                                                                                                    DataType.Name.VARINT), TIMEUUID(
-                                                                                                            15,
-                                                                                                            UUID.class,
-                                                                                                            DataType.Name.TIMEUUID), LIST(
-                                                                                                                    32,
-                                                                                                                    List.class,
-                                                                                                                    DataType.Name.LIST), SET(
-                                                                                                                            34,
-                                                                                                                            Set.class,
-                                                                                                                            DataType.Name.SET), MAP(
-                                                                                                                                    33,
-                                                                                                                                    Map.class,
-                                                                                                                                    DataType.Name.MAP), UDT(
-                                                                                                                                            48,
-                                                                                                                                            UDTValue.class,
-                                                                                                                                            DataType.Name.UDT), TUPLE(
-                                                                                                                                                    49,
-                                                                                                                                                    TupleValue.class,
-                                                                                                                                                    DataType.Name.TUPLE), CUSTOM(
-                                                                                                                                                            0,
-                                                                                                                                                            ByteBuffer.class,
-                                                                                                                                                            DataType.Name.CUSTOM), SMALLINT(
-                                                                                                                                                                    19,
-                                                                                                                                                                    Integer.class,
-                                                                                                                                                                    DataType.Name.SMALLINT), TINYINT(
-                                                                                                                                                                            20,
-                                                                                                                                                                            Integer.class,
-                                                                                                                                                                            DataType.Name.TINYINT), DATE(
-                                                                                                                                                                                    17,
-                                                                                                                                                                                    Date.class,
-                                                                                                                                                                                    DataType.Name.DATE), TIME(
-                                                                                                                                                                                            18,
-                                                                                                                                                                                            Date.class,
-                                                                                                                                                                                            DataType.Name.TIME);
+    // @formatter:off
+    CUSTOM(0, ByteBuffer.class, DataType.Name.CUSTOM, null),
+    ASCII(1, String.class, DataType.Name.ASCII, JdbcAscii.instance),
+    BIGINT(2, Long.class, DataType.Name.BIGINT, JdbcBigInteger.instance),
+    BLOB(3, ByteBuffer.class, DataType.Name.BLOB, JdbcBytes.instance),
+    BOOLEAN(4, Boolean.class, DataType.Name.BOOLEAN, JdbcBoolean.instance),
+    COUNTER(5, Long.class, DataType.Name.COUNTER, JdbcCounterColumn.instance),
+    DECIMAL(6, BigDecimal.class, DataType.Name.DECIMAL, JdbcDecimal.instance),
+    DOUBLE(7, Double.class, DataType.Name.DOUBLE, JdbcDouble.instance),
+    FLOAT(8, Float.class, DataType.Name.FLOAT, JdbcFloat.instance),
+    INT(9, Integer.class, DataType.Name.INT, JdbcInt.instance),
+    TEXT(10, String.class, DataType.Name.TEXT, null), // UTF8?
+    TIMESTAMP(11, Timestamp.class, DataType.Name.TIMESTAMP, JdbcTimestamp.instance),
+    UUID(12, UUID.class, DataType.Name.UUID, JdbcUUID.instance),
+    VARCHAR(13, String.class, DataType.Name.VARCHAR, JdbcUTF8.instance),
+    VARINT(14, BigInteger.class, DataType.Name.VARINT, null),
+    TIMEUUID(15, UUID.class, DataType.Name.TIMEUUID, JdbcTimeUUID.instance),
+    INET(16, InetAddress.class, DataType.Name.INET, JdbcInetAddress.instance),
+
+    LIST(32, List.class, DataType.Name.LIST, null),
+    SET(34, Set.class, DataType.Name.SET, null),
+    MAP(33, Map.class, DataType.Name.MAP, null),
+
+    // API version 3
+    UDT(48, UDTValue.class, DataType.Name.UDT, JdbcUdt.instance),
+    TUPLE(49, TupleValue.class, DataType.Name.TUPLE, JdbcTuple.instance),
+
+    // API version 4
+    DATE(17, Date.class, DataType.Name.DATE, JdbcDate.instance),
+    TIME(18, Time.class, DataType.Name.TIME, JdbcTime.instance),
+    SMALLINT(19, Short.class, DataType.Name.SMALLINT, JdbcShort.instance),
+    TINYINT(20, Byte.class, DataType.Name.TINYINT, JdbcByte.instance),
+
+    // API version 5
+    DURATION(21, Duration.class, DataType.Name.DURATION, JdbcDuration.instance);
+    // @formatter:on
 
     final int protocolId;
     final Class<?> javaType;
     final Name cqlType;
+    final AbstractJdbcType<?> jdbcType;
+    final int precision;
 
     private static final DataTypeEnum[] nameToIds;
     private static final Map<DataType.Name, DataTypeEnum> cqlDataTypeToDataType;
+    private static final Map<Class<?>, DataTypeEnum> javaClassToDataType;
+    private static final Map<Class<?>, DataTypeEnum> jdbcTypeToDataType;
 
     static {
 
         cqlDataTypeToDataType = Maps.newHashMap();
+        javaClassToDataType = Maps.newHashMap();
+        jdbcTypeToDataType = Maps.newHashMap();
 
         int maxCode = -1;
         for (DataTypeEnum name : DataTypeEnum.values())
@@ -94,17 +86,36 @@ public enum DataTypeEnum {
             nameToIds[name.protocolId] = name;
 
             cqlDataTypeToDataType.put(name.cqlType, name);
+            javaClassToDataType.put(name.javaType, name);
+            if (name.jdbcType != null) {
+                jdbcTypeToDataType.put(name.jdbcType.getClass(), name);
+            }
         }
     }
 
-    private DataTypeEnum(int protocolId, Class<?> javaType, Name cqlType) {
+    private DataTypeEnum(int protocolId, Class<?> javaType, Name cqlType,
+            AbstractJdbcType<?> jdbcType) {
         this.protocolId = protocolId;
         this.javaType = javaType;
         this.cqlType = cqlType;
+        this.jdbcType = jdbcType;
+        int precision = 0;
+        if (jdbcType != null) {
+            precision = jdbcType.getPrecision(null);
+        }
+        this.precision = precision;
     }
 
     static DataTypeEnum fromCqlTypeName(DataType.Name cqlTypeName) {
         return cqlDataTypeToDataType.get(cqlTypeName);
+    }
+
+    public static DataTypeEnum fromClass(Class<?> javaType) {
+        return javaClassToDataType.get(javaType);
+    }
+
+    public static DataTypeEnum fromJdbcType(Class<?> jdbcType) {
+        return jdbcTypeToDataType.get(jdbcType);
     }
 
     static DataTypeEnum fromProtocolId(int id) {
@@ -129,6 +140,13 @@ public enum DataTypeEnum {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Returns the default precision the type. (See CassandraResultSet)
+     */
+    public int getPrecision() {
+        return precision;
     }
 
     /**
@@ -166,12 +184,20 @@ public enum DataTypeEnum {
      * <td>ByteBuffer</td>
      * </tr>
      * <tr>
+     * <td>DATE</td>
+     * <td>java.sql.Date</td>
+     * </tr>
+     * <tr>
      * <td>DECIMAL</td>
      * <td>BigDecimal</td>
      * </tr>
      * <tr>
      * <td>DOUBLE</td>
      * <td>Double</td>
+     * </tr>
+     * <tr>
+     * <td>DURATION</td>
+     * <td>com.datastax.driver.core.Duration</td>
      * </tr>
      * <tr>
      * <td>FLOAT</td>
@@ -198,24 +224,40 @@ public enum DataTypeEnum {
      * <td>Set</td>
      * </tr>
      * <tr>
+     * <td>SMALLINT</td>
+     * <td>Short</td>
+     * </tr>
+     * <tr>
      * <td>TEXT</td>
      * <td>String</td>
      * </tr>
      * <tr>
-     * <td>TIMESTAMP</td>
-     * <td>Date</td>
+     * <td>TIME</td>
+     * <td>java.sql.Time</td>
      * </tr>
      * <tr>
+     * <td>TIMESTAMP</td>
+     * <td>java.sql.Timestamp</td>
+     * </tr>
+     * <tr>
+     * <td>TIMEUUID</td>
      * <td>UUID</td>
-     * <td>UUID</td>
+     * </tr>
+     * <tr>
+     * <td>TINYINT</td>
+     * <td>Byte</td>
+     * </tr>
+     * <tr>
+     * <td>TUPLE</td>
+     * <td>TupleValue</td>
      * </tr>
      * <tr>
      * <td>UDT</td>
      * <td>UDTValue</td>
      * </tr>
      * <tr>
-     * <td>TUPLE</td>
-     * <td>TupleValue</td>
+     * <td>UUID</td>
+     * <td>UUID</td>
      * </tr>
      * <tr>
      * <td>VARCHAR</td>
@@ -225,10 +267,7 @@ public enum DataTypeEnum {
      * <td>VARINT</td>
      * <td>BigInteger</td>
      * </tr>
-     * <tr>
-     * <td>TIMEUUID</td>
-     * <td>UUID</td>
-     * </tr>
+     * <--------------------------------------------------------------------
      * </table>
      *
      * @return the java Class corresponding to this CQL type name.

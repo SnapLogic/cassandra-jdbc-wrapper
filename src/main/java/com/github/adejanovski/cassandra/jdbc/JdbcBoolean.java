@@ -32,7 +32,8 @@ public class JdbcBoolean extends AbstractJdbcType<Boolean> {
     }
 
     public int getPrecision(Boolean obj) {
-        return -1;
+        // max size is for 'false'.
+        return 5;
     }
 
     public boolean isCurrency() {
@@ -44,7 +45,7 @@ public class JdbcBoolean extends AbstractJdbcType<Boolean> {
     }
 
     public String toString(Boolean obj) {
-        return obj.toString();
+        return (obj == null) ? null : obj.toString();
     }
 
     public boolean needsQuotes() {
@@ -77,6 +78,6 @@ public class JdbcBoolean extends AbstractJdbcType<Boolean> {
     }
 
     public Object decompose(Boolean value) {
-        return (value == null) ? null : (Object) value;
+        return null;
     }
 }

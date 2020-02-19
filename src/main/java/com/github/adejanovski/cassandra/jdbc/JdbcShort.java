@@ -17,22 +17,23 @@ package com.github.adejanovski.cassandra.jdbc;
 import java.nio.ByteBuffer;
 import java.sql.Types;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+public class JdbcShort extends AbstractJdbcType<Short> {
+    public static final JdbcShort instance = new JdbcShort();
 
-    JdbcDouble() {
+    JdbcShort() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(Short obj) {
+        return 0;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
+    public int getPrecision(Short obj) {
+        // max size is -32768
+        return (obj == null) ? 6 : obj.toString().length();
     }
 
     public boolean isCurrency() {
@@ -43,7 +44,7 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
         return true;
     }
 
-    public String toString(Double obj) {
+    public String toString(Short obj) {
         return (obj == null) ? null : obj.toString();
     }
 
@@ -54,27 +55,27 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
     public String getString(ByteBuffer bytes) {
         if ((bytes == null) || !bytes.hasRemaining()) {
             return null;
-        } else if (bytes.remaining() != 8) {
+        } else if (bytes.remaining() != 2) {
             throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
+                    "A short is exactly 2 bytes: " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        return toString(compose(bytes));
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class<Short> getType() {
+        return Short.class;
     }
 
     public int getJdbcType() {
-        return Types.DOUBLE;
+        return Types.SMALLINT;
     }
 
-    public Double compose(Object value) {
-        return (Double) value;
+    public Short compose(Object obj) {
+        return (Short) obj;
     }
 
-    public Object decompose(Double value) {
+    public Object decompose(Short value) {
         return value;
     }
 }

@@ -32,10 +32,11 @@ public class ConnectionUnitTest {
             .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
     private static final String KEYSPACE = "system";
     // private static final String CQLV3 = "3.0.0";
-    private static final String CONSISTENCY_QUORUM = "QUORUM";
+    // private static final String CONSISTENCY_QUORUM = "QUORUM";
 
     private static java.sql.Connection con = null;
 
+    @SuppressWarnings("unused")
     private static CCMBridge ccmBridge = null;
     private static boolean suiteLaunch = true;
 

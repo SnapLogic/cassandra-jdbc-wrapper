@@ -32,7 +32,8 @@ public class JdbcLong extends AbstractJdbcType<Long> {
     }
 
     public int getPrecision(Long obj) {
-        return obj.toString().length();
+        // max size is -9223372036854775808
+        return (obj == null) ? 20 : obj.toString().length();
     }
 
     public boolean isCurrency() {
@@ -44,7 +45,7 @@ public class JdbcLong extends AbstractJdbcType<Long> {
     }
 
     public String toString(Long obj) {
-        return obj.toString();
+        return (obj == null) ? null : obj.toString();
     }
 
     public boolean needsQuotes() {
@@ -52,10 +53,9 @@ public class JdbcLong extends AbstractJdbcType<Long> {
     }
 
     public String getString(ByteBuffer bytes) {
-        if (bytes.remaining() == 0) {
-            return "";
-        }
-        if (bytes.remaining() != 8) {
+        if ((bytes == null) || bytes.hasRemaining()) {
+            return null;
+        } else if (bytes.remaining() != 8) {
             throw new MarshalException("A long is exactly 8 bytes: " + bytes.remaining());
         }
 
@@ -75,6 +75,6 @@ public class JdbcLong extends AbstractJdbcType<Long> {
     }
 
     public Object decompose(Long value) {
-        return (Object) value;
+        return value;
     }
 }

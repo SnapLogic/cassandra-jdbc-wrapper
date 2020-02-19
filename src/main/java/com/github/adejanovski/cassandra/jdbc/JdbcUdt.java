@@ -45,8 +45,7 @@ public class JdbcUdt extends AbstractJdbcType<UDTValue> {
     }
 
     public String getString(Object obj) {
-        return obj.toString();
-
+        return (obj == null) ? null : obj.toString();
     }
 
     public Class<UDTValue> getType() {
@@ -62,7 +61,7 @@ public class JdbcUdt extends AbstractJdbcType<UDTValue> {
     }
 
     public Object decompose(UDTValue value) {
-        return (Object) value;
+        return value;
     }
 
     @Override
@@ -80,7 +79,6 @@ public class JdbcUdt extends AbstractJdbcType<UDTValue> {
     @Override
     public String toString(UDTValue obj) {
         // TODO Auto-generated method stub
-        return obj.toString();
+        return (obj == null) ? null : obj.toString();
     }
-
 }

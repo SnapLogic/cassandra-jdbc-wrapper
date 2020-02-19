@@ -14,25 +14,26 @@
  */
 package com.github.adejanovski.cassandra.jdbc;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.sql.Types;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+public class JdbcBigInteger extends AbstractJdbcType<BigInteger> {
+    public static final JdbcBigInteger instance = new JdbcBigInteger();
 
-    JdbcDouble() {
+    JdbcBigInteger() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(BigInteger obj) {
+        return 0;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
+    public int getPrecision(BigInteger obj) {
+        return (obj == null) ? Integer.MAX_VALUE : obj.toString().length();
     }
 
     public boolean isCurrency() {
@@ -43,7 +44,7 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
         return true;
     }
 
-    public String toString(Double obj) {
+    public String toString(BigInteger obj) {
         return (obj == null) ? null : obj.toString();
     }
 
@@ -54,27 +55,24 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
     public String getString(ByteBuffer bytes) {
         if ((bytes == null) || !bytes.hasRemaining()) {
             return null;
-        } else if (bytes.remaining() != 8) {
-            throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        return toString(compose(bytes));
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class<BigInteger> getType() {
+        return BigInteger.class;
     }
 
     public int getJdbcType() {
-        return Types.DOUBLE;
+        return Types.DECIMAL;
     }
 
-    public Double compose(Object value) {
-        return (Double) value;
+    public BigInteger compose(Object obj) {
+        return (BigInteger) obj;
     }
 
-    public Object decompose(Double value) {
+    public Object decompose(BigInteger value) {
         return value;
     }
 }

@@ -25,9 +25,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -48,7 +54,6 @@ import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * A set of static utility methods used by the JDBC Suite, and various default values and error
@@ -134,6 +139,39 @@ public class Utils {
     protected static final String URI_IS_SIMPLE = "Connection url may only include host, port, and keyspace, consistency and version option, e.g., jdbc:cassandra://localhost:9042/Keyspace1?version=3.0.0&consistency=ONE";
     protected static final String NOT_OPTION = "Connection url only supports the 'version' and 'consistency' options";
     protected static final String FORWARD_ONLY = "Can not position cursor with a type of TYPE_FORWARD_ONLY";
+    protected static final String BAD_DATE_FORMAT = "invalid date format - expected 'yyyy-mm-dd'";
+    protected static final String BAD_TIME_FORMAT = "invalid time format - expected 'hh:mm:ss'";
+    protected static final String BAD_TIMESTAMP_FORMAT = "invalid timestamp format - expected 'yyyy-mm-dd hh:mm:ss'";
+
+    // ISO-8601 patterns
+    // @formatter:off
+    protected static final String DATE_FORMATS[] = {
+        "yyyy-MM-dd"
+    };
+    // @formatter:on
+
+    // ISO-8601 patterns
+    // @formatter:off
+    protected static final String TIME_FORMATS[] = {
+        "HH:mm:ss",
+        "HH:mm:ss[.SSSSSS]"
+    };
+    // @formatter:on
+
+    // ISO-8601 patterns
+    // @formatter:off
+    protected static final String TIMESTAMP_FORMATS[] = {
+        // without timezone
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd[(T | )]HH:mm:ss[.SSS]",
+        "yyyy-MM-dd[(T | )]HH:mm",
+        "yyyy-MM-dd",
+        // with timezone
+        "yyyy-MM-dd[(T| )]HH:mm:ss[.SSS]XXX",
+        "yyyy-MM-dd[(T| )]HH:mmXXX",
+        "yyyy-MM-ddXXX"
+    };
+    // @formatter:on
 
     protected static final Logger logger = LoggerFactory.getLogger(Utils.class);
 
@@ -345,98 +383,17 @@ public class Utils {
         return params;
     }
 
-    public static LinkedHashSet<?> parseSet(String itemType, String value) {
-
-        if (itemType.equals("varchar") || itemType.equals("text") || itemType.equals("ascii")) {
-            LinkedHashSet<String> zeSet = new LinkedHashSet<String>();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-            for (String val : values) {
-                zeSet.add(val);
-            }
-            return zeSet;
-
-        } else if (itemType.equals("bigint")) {
-            LinkedHashSet<Long> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(Long.parseLong(val.trim()));
-            }
-            return zeSet;
-        } else if (itemType.equals("varint")) {
-            LinkedHashSet<BigInteger> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(BigInteger.valueOf(Long.parseLong(val.trim())));
-            }
-            return zeSet;
-        } else if (itemType.equals("decimal")) {
-            LinkedHashSet<BigDecimal> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(BigDecimal.valueOf(Double.parseDouble(val.trim())));
-            }
-            return zeSet;
-        } else if (itemType.equals("double")) {
-            LinkedHashSet<Double> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(Double.parseDouble(val.trim()));
-            }
-            return zeSet;
-        } else if (itemType.equals("float")) {
-            LinkedHashSet<Float> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(Float.parseFloat(val.trim()));
-            }
-            return zeSet;
-        } else if (itemType.equals("boolean")) {
-            LinkedHashSet<Boolean> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(Boolean.parseBoolean(val.trim()));
-            }
-            return zeSet;
-        } else if (itemType.equals("int")) {
-            LinkedHashSet<Integer> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(Integer.parseInt(val.trim()));
-            }
-            return zeSet;
-        } else if (itemType.equals("uuid")) {
-            LinkedHashSet<UUID> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(UUID.fromString(val.trim()));
-            }
-            return zeSet;
-        } else if (itemType.equals("timeuuid")) {
-            LinkedHashSet<UUID> zeSet = Sets.newLinkedHashSet();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeSet.add(UUID.fromString(val.trim()));
-            }
-            return zeSet;
-        }
-        return null;
-
+    public static LinkedHashSet<?> parseSet(String itemType, String value) throws SQLException {
+        @SuppressWarnings({ "boxing", "unchecked", "rawtypes" })
+        LinkedHashSet<?> set = new LinkedHashSet(Utils.parseList(itemType, value));
+        return set;
     }
 
-    public static ArrayList<?> parseList(String itemType, String value) {
+    public static ArrayList<?> parseList(String itemType, String value) throws SQLException {
+        String[] values = value.replace("[", "").replace("]", "").split(", ");
 
         if (itemType.equals("varchar") || itemType.equals("text") || itemType.equals("ascii")) {
             ArrayList<String> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
             int i = 0;
             for (String val : values) {
                 if (i > 0 && val.startsWith(" ")) {
@@ -450,83 +407,95 @@ public class Utils {
 
         } else if (itemType.equals("bigint")) {
             ArrayList<Long> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
             for (String val : values) {
                 zeList.add(Long.parseLong(val.trim()));
             }
             return zeList;
-        } else if (itemType.equals("varint")) {
-            ArrayList<BigInteger> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
+        } else if (itemType.equals("boolean")) {
+            ArrayList<Boolean> zeList = Lists.newArrayList();
             for (String val : values) {
-                zeList.add(BigInteger.valueOf(Long.parseLong(val.trim())));
+                zeList.add(Boolean.parseBoolean(val.trim()));
+            }
+            return zeList;
+        } else if (itemType.equals("date")) {
+            ArrayList<Date> zeList = Lists.newArrayList();
+            for (String val : values) {
+                zeList.add(Utils.parseDate(val.trim()));
             }
             return zeList;
         } else if (itemType.equals("decimal")) {
             ArrayList<BigDecimal> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
             for (String val : values) {
                 zeList.add(BigDecimal.valueOf(Double.parseDouble(val.trim())));
             }
             return zeList;
         } else if (itemType.equals("double")) {
             ArrayList<Double> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
             for (String val : values) {
                 zeList.add(Double.parseDouble(val.trim()));
             }
             return zeList;
         } else if (itemType.equals("float")) {
             ArrayList<Float> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
             for (String val : values) {
                 zeList.add(Float.parseFloat(val.trim()));
             }
             return zeList;
-        } else if (itemType.equals("boolean")) {
-            ArrayList<Boolean> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
-            for (String val : values) {
-                zeList.add(Boolean.parseBoolean(val.trim()));
-            }
-            return zeList;
         } else if (itemType.equals("int")) {
             ArrayList<Integer> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
             for (String val : values) {
                 zeList.add(Integer.parseInt(val.trim()));
             }
             return zeList;
-        } else if (itemType.equals("uuid")) {
-            ArrayList<UUID> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
+        } else if (itemType.equals("smallint")) {
+            ArrayList<Short> zeList = Lists.newArrayList();
             for (String val : values) {
-                zeList.add(UUID.fromString(val.trim()));
+                zeList.add(Short.parseShort(val.trim()));
+            }
+            return zeList;
+        } else if (itemType.equals("time")) {
+            ArrayList<Time> zeList = Lists.newArrayList();
+            for (String val : values) {
+                zeList.add(Utils.parseTime(val.trim()));
+            }
+            return zeList;
+        } else if (itemType.equals("timestamp")) {
+            ArrayList<Timestamp> zeList = Lists.newArrayList();
+            for (String val : values) {
+                zeList.add(Utils.parseTimestamp(val.trim()));
             }
             return zeList;
         } else if (itemType.equals("timeuuid")) {
             ArrayList<UUID> zeList = Lists.newArrayList();
-            String[] values = value.replace("[", "").replace("]", "").split(", ");
-
             for (String val : values) {
                 zeList.add(UUID.fromString(val.trim()));
             }
             return zeList;
-        }
-        return null;
+        } else if (itemType.equals("tinyint")) {
+            ArrayList<Byte> zeList = Lists.newArrayList();
+            for (String val : values) {
+                zeList.add(Byte.parseByte(val.trim()));
+            }
+            return zeList;
+        } else if (itemType.equals("uuid")) {
+            ArrayList<UUID> zeList = Lists.newArrayList();
+            for (String val : values) {
+                zeList.add(UUID.fromString(val.trim()));
+            }
+            return zeList;
+        } else if (itemType.equals("varint")) {
+            ArrayList<BigInteger> zeList = Lists.newArrayList();
+            for (String val : values) {
+                zeList.add(BigInteger.valueOf(Long.parseLong(val.trim())));
+            }
+            return zeList;
+        } // FIXME - Duration
 
+        return null;
     }
 
     @SuppressWarnings({ "boxing", "unchecked", "rawtypes" })
-    public static HashMap<?, ?> parseMap(String kType, String vType, String value) {
+    public static HashMap<?, ?> parseMap(String kType, String vType, String value) throws SQLException {
         // Parsing values looking like this :
         // {key1:val1, key2:val2}
 
@@ -539,8 +508,8 @@ public class Utils {
             String[] keyVal = val.split("=");
             if (kType.equals("bigint")) {
                 keys.add(Long.parseLong(keyVal[0]));
-            } else if (kType.equals("varint")) {
-                keys.add(BigInteger.valueOf(Long.parseLong(keyVal[0])));
+            } else if (kType.equals("date")) {
+                keys.add(parseDate(keyVal[0]));
             } else if (kType.equals("decimal")) {
                 keys.add(BigDecimal.valueOf(Double.parseDouble(keyVal[0])));
             } else if (kType.equals("double")) {
@@ -551,18 +520,28 @@ public class Utils {
                 keys.add(Boolean.parseBoolean(keyVal[0]));
             } else if (kType.equals("int")) {
                 keys.add(Integer.parseInt(keyVal[0]));
-            } else if (kType.equals("uuid")) {
-                keys.add(UUID.fromString(keyVal[0]));
+            } else if (kType.equals("smallint")) {
+                keys.add(Short.parseShort(keyVal[0]));
+            } else if (kType.equals("time")) {
+                keys.add(parseTime(keyVal[0]));
+            } else if (kType.equals("timestamp")) {
+                keys.add(parseTimestamp(keyVal[0]));
             } else if (kType.equals("timeuuid")) {
                 keys.add(UUID.fromString(keyVal[0]));
+            } else if (kType.equals("tinyint")) {
+                keys.add(Byte.parseByte(keyVal[0]));
+            } else if (kType.equals("uuid")) {
+                keys.add(UUID.fromString(keyVal[0]));
+            } else if (kType.equals("varint")) {
+                keys.add(BigInteger.valueOf(Long.parseLong(keyVal[0])));
             } else {
                 keys.add(keyVal[0]);
-            }
+            } // FIXME: Duration
 
             if (vType.equals("bigint")) {
                 vals.add(Long.parseLong(keyVal[1]));
-            } else if (vType.equals("varint")) {
-                vals.add(BigInteger.valueOf(Long.parseLong(keyVal[1])));
+            } else if (vType.equals("date")) {
+                vals.add(parseDate(keyVal[1]));
             } else if (vType.equals("decimal")) {
                 vals.add(BigDecimal.valueOf(Double.parseDouble(keyVal[1])));
             } else if (vType.equals("double")) {
@@ -573,20 +552,28 @@ public class Utils {
                 vals.add(Boolean.parseBoolean(keyVal[1]));
             } else if (vType.equals("int")) {
                 vals.add(Integer.parseInt(keyVal[1]));
-            } else if (vType.equals("uuid")) {
-                vals.add(UUID.fromString(keyVal[1]));
+            } else if (kType.equals("smallint")) {
+                vals.add(Short.parseShort(keyVal[0]));
+            } else if (vType.equals("time")) {
+                vals.add(parseTime(keyVal[1]));
+            } else if (vType.equals("timestamp")) {
+                vals.add(parseTimestamp(keyVal[1]));
             } else if (vType.equals("timeuuid")) {
                 vals.add(UUID.fromString(keyVal[1]));
+            } else if (kType.equals("tinyint")) {
+                vals.add(Byte.parseByte(keyVal[0]));
+            } else if (vType.equals("uuid")) {
+                vals.add(UUID.fromString(keyVal[1]));
+            } else if (vType.equals("varint")) {
+                vals.add(BigInteger.valueOf(Long.parseLong(keyVal[1])));
             } else {
                 vals.add(keyVal[1]);
-            }
+            } // FIXME: Duration
 
             zeMap.put(keys.get(keys.size() - 1), vals.get(vals.size() - 1));
-
         }
 
         return (HashMap<?, ?>) zeMap;
-
     }
 
     public static LoadBalancingPolicy parseLbPolicy(String loadBalancingPolicyString)
@@ -863,4 +850,121 @@ public class Utils {
         return policy;
     }
 
+    /**
+     * Convert string to java.sql.Date
+     *
+     * @param value
+     * @return
+     * @throws SQLException
+     */
+    public static Date parseDate(String value) throws SQLException {
+        if ((value == null) || value.isEmpty()) {
+            return null;
+        }
+        for (String format : DATE_FORMATS) {
+            DateFormat df = new SimpleDateFormat(format);
+            try {
+                return new Date(df.parse(value).getTime());
+            } catch (ParseException e) {
+                // ignore for now
+            }
+        }
+
+        // none of the patterns match.
+        throw new SQLException(BAD_DATE_FORMAT);
+    }
+
+    /**
+     * Convert java.sql.Date to String
+     */
+    public static String formatDate(Date value) {
+        if (value == null) {
+            return null;
+        }
+
+        return (new SimpleDateFormat(DATE_FORMATS[0])).format(value);
+    }
+
+    /**
+     * Convert string to java.sql.Time
+     *
+     * @param value
+     * @return
+     * @throws SQLException
+     */
+    public static Time parseTime(String value) throws SQLException {
+        if ((value == null) || value.isEmpty()) {
+            return null;
+        }
+        for (String format : TIME_FORMATS) {
+            DateFormat df = new SimpleDateFormat(format);
+            try {
+                return new Time(df.parse(value).getTime());
+            } catch (ParseException e) {
+                // ignore for now
+            }
+        }
+
+        // none of the patterns match.
+        throw new SQLException(BAD_TIME_FORMAT);
+    }
+
+    /**
+     * Convert java.sql.Time to String
+     */
+    public static String formatTime(Time value) {
+        if (value == null) {
+            return null;
+        }
+
+        return (new SimpleDateFormat(TIME_FORMATS[0])).format(value);
+    }
+
+    /**
+     * Convert string to java.sql.Timestamp
+     *
+     * @param value
+     * @return
+     * @throws SQLException
+     */
+    public static Timestamp parseTimestamp(String value) throws SQLException {
+        if ((value == null) || value.isEmpty()) {
+            return null;
+        }
+
+        for (String format : TIMESTAMP_FORMATS) {
+            DateFormat df = new SimpleDateFormat(format);
+            try {
+                return new Timestamp(df.parse(value).getTime());
+            } catch (ParseException e) {
+                // ignore for now
+            }
+        }
+
+        Timestamp.valueOf(value);
+        // none of the patterns match.
+        throw new SQLException(BAD_TIMESTAMP_FORMAT);
+    }
+
+    /**
+     * Convert java.sql.Timestamp to String
+     */
+    public static String formatTimestamp(Timestamp value) {
+        if (value == null) {
+            return null;
+        }
+
+        return (new SimpleDateFormat(TIMESTAMP_FORMATS[0])).format(value);
+    }
+
+    /**
+     * Convert java.util.Date to String
+     */
+    public static String formatDate(java.util.Date value) {
+        if (value == null) {
+            return null;
+        }
+
+        return (new SimpleDateFormat(TIMESTAMP_FORMATS[0])).format(value);
+    }
 }

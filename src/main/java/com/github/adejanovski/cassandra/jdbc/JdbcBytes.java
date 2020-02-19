@@ -32,7 +32,7 @@ public class JdbcBytes extends AbstractJdbcType<ByteBuffer> {
     }
 
     public int getPrecision(ByteBuffer obj) {
-        return -1;
+        return (obj == null) ? Integer.MAX_VALUE / 2 : obj.remaining();
     }
 
     public boolean isCurrency() {

@@ -44,6 +44,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+//import com.datastax.driver.core.CCMBridge;
+//import com.datastax.driver.core.CCMBridge.CCMCluster;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
@@ -59,6 +61,7 @@ public class JdbcRegressionUnitTest {
 
     private static java.sql.Connection con = null;
 
+    @SuppressWarnings("unused")
     private static CCMBridge ccmBridge = null;
     private static boolean suiteLaunch = true;
 

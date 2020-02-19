@@ -170,5 +170,4 @@ abstract class AbstractStatement {
             throws SQLException {
         throw new SQLFeatureNotSupportedException(NOT_SUPPORTED);
     }
-
 }

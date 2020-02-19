@@ -40,6 +40,7 @@ public class DataSourceUnitTest {
     private static final String CONSISTENCY = "ONE";
 
     private static java.sql.Connection con = null;
+    @SuppressWarnings("unused")
     private static CCMBridge ccmBridge = null;
 
     private static boolean suiteLaunch = true;

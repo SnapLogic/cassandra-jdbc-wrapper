@@ -31,9 +31,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -50,8 +47,6 @@ public class CassandraDriver implements Driver {
     public static final int DVR_PATCH_VERSION = 6;
 
     public static final String DVR_NAME = "Datastax JDBC Driver";
-
-    private static final Logger logger = LoggerFactory.getLogger(CassandraDriver.class);
 
     static {
         // Register the CassandraDriver with DriverManager

@@ -51,6 +51,7 @@ public class CollectionsUnitTest {
 
     private static java.sql.Connection con = null;
 
+    @SuppressWarnings("unused")
     private static CCMBridge ccmBridge = null;
 
     private static boolean suiteLaunch = true;

@@ -17,22 +17,22 @@ package com.github.adejanovski.cassandra.jdbc;
 import java.nio.ByteBuffer;
 import java.sql.Types;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+public class JdbcByte extends AbstractJdbcType<Byte> {
+    public static final JdbcByte instance = new JdbcByte();
 
-    JdbcDouble() {
+    JdbcByte() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(Byte obj) {
+        return 0;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
+    public int getPrecision(Byte obj) {
+        return (obj == null) ? 4 : obj.toString().length();
     }
 
     public boolean isCurrency() {
@@ -43,7 +43,7 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
         return true;
     }
 
-    public String toString(Double obj) {
+    public String toString(Byte obj) {
         return (obj == null) ? null : obj.toString();
     }
 
@@ -54,27 +54,27 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
     public String getString(ByteBuffer bytes) {
         if ((bytes == null) || !bytes.hasRemaining()) {
             return null;
-        } else if (bytes.remaining() != 8) {
+        } else if (bytes.remaining() != 1) {
             throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
+                    "A date is exactly 1 byte: " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        return toString(compose(bytes));
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class<Byte> getType() {
+        return Byte.class;
     }
 
     public int getJdbcType() {
-        return Types.DOUBLE;
+        return Types.TINYINT;
     }
 
-    public Double compose(Object value) {
-        return (Double) value;
+    public Byte compose(Object obj) {
+        return (Byte) obj;
     }
 
-    public Object decompose(Double value) {
+    public Object decompose(Byte value) {
         return value;
     }
 }

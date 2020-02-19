@@ -17,22 +17,23 @@ package com.github.adejanovski.cassandra.jdbc;
 import java.nio.ByteBuffer;
 import java.sql.Types;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+public class JdbcInt extends AbstractJdbcType<Integer> {
+    public static final JdbcInt instance = new JdbcInt();
 
-    JdbcDouble() {
+    JdbcInt() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(Integer obj) {
+        return 0;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
+    public int getPrecision(Integer obj) {
+        // max size is -2147483648
+        return (obj == null) ? 11 : obj.toString().length();
     }
 
     public boolean isCurrency() {
@@ -43,7 +44,7 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
         return true;
     }
 
-    public String toString(Double obj) {
+    public String toString(Integer obj) {
         return (obj == null) ? null : obj.toString();
     }
 
@@ -54,27 +55,27 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
     public String getString(ByteBuffer bytes) {
         if ((bytes == null) || !bytes.hasRemaining()) {
             return null;
-        } else if (bytes.remaining() != 8) {
+        } else if (bytes.remaining() != 4) {
             throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
+                    "An integer is exactly 4 bytes: " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        return toString(compose(bytes));
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class<Integer> getType() {
+        return Integer.class;
     }
 
     public int getJdbcType() {
-        return Types.DOUBLE;
+        return Types.INTEGER;
     }
 
-    public Double compose(Object value) {
-        return (Double) value;
+    public Integer compose(Object value) {
+        return (Integer) value;
     }
 
-    public Object decompose(Double value) {
+    public Object decompose(Integer value) {
         return value;
     }
 }

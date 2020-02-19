@@ -34,7 +34,9 @@ public class JdbcInetAddress extends AbstractJdbcType<InetAddress> {
     }
 
     public int getPrecision(InetAddress obj) {
-        return obj.toString().length();
+        // max size for inet4 is 'xxx:xxx:xxx:xxx'
+        // max size for inet6 is much longer but still rare
+        return (obj == null) ? 15 : obj.toString().length();
     }
 
     public boolean isCurrency() {
@@ -46,7 +48,7 @@ public class JdbcInetAddress extends AbstractJdbcType<InetAddress> {
     }
 
     public String toString(InetAddress obj) {
-        return obj.getHostAddress();
+        return (obj == null) ? null : obj.getHostAddress();
     }
 
     public boolean needsQuotes() {
@@ -74,6 +76,6 @@ public class JdbcInetAddress extends AbstractJdbcType<InetAddress> {
     }
 
     public Object decompose(InetAddress value) {
-        return (Object) value.getAddress();
+        return value.getAddress();
     }
 }

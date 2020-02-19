@@ -51,8 +51,7 @@ public class JdbcOther extends AbstractJdbcType<String> {
     }
 
     public String getString(Object obj) {
-        return obj.toString();
-
+        return (obj == null) ? null : obj.toString();
     }
 
     public Class<String> getType() {
@@ -68,7 +67,6 @@ public class JdbcOther extends AbstractJdbcType<String> {
     }
 
     public Object decompose(String value) {
-        return (Object) value;
+        return value;
     }
-
 }

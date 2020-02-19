@@ -15,23 +15,10 @@
 package com.github.adejanovski.cassandra.jdbc;
 
 import java.nio.ByteBuffer;
+import java.sql.Date;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class JdbcDate extends AbstractJdbcType<Date> {
-    public static final String[] iso8601Patterns = new String[] { "yyyy-MM-dd HH:mm",
-            "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mmZ", "yyyy-MM-dd HH:mm:ssZ",
-            "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd'T'HH:mmZ", "yyyy-MM-dd'T'HH:mm:ss",
-            "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd", "yyyy-MM-ddZ", "yyyy-MM-dd'T'HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
-    static final String DEFAULT_FORMAT = iso8601Patterns[3];
-    static final ThreadLocal<SimpleDateFormat> FORMATTER = new ThreadLocal<SimpleDateFormat>() {
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat(DEFAULT_FORMAT);
-        }
-    };
 
     public static final JdbcDate instance = new JdbcDate();
 
@@ -47,7 +34,8 @@ public class JdbcDate extends AbstractJdbcType<Date> {
     }
 
     public int getPrecision(Date obj) {
-        return -1;
+        // format is always 'yyyy-mm-dd'
+        return 10;
     }
 
     public boolean isCurrency() {
@@ -59,7 +47,7 @@ public class JdbcDate extends AbstractJdbcType<Date> {
     }
 
     public String toString(Date obj) {
-        return FORMATTER.get().format(obj);
+        return (obj == null) ? null : Utils.formatDate(obj);
     }
 
     public boolean needsQuotes() {
@@ -67,16 +55,14 @@ public class JdbcDate extends AbstractJdbcType<Date> {
     }
 
     public String getString(ByteBuffer bytes) {
-        if (bytes.remaining() == 0) {
-            return "";
-        }
-        if (bytes.remaining() != 8) {
+        if ((bytes == null) || !bytes.hasRemaining()) {
+            return null;
+        } else if (bytes.remaining() != 8) {
             throw new MarshalException(
-                    "A date is exactly 8 bytes (stored as a long): " + bytes.remaining());
+                    "A date is exactly 8 bytes (stored as an long): " + bytes.remaining());
         }
 
-        // uses ISO-8601 formatted string
-        return FORMATTER.get().format(new Date(bytes.getLong(bytes.position())));
+        return toString(new Date(bytes.getLong(bytes.position())));
     }
 
     public Class<Date> getType() {
@@ -84,7 +70,7 @@ public class JdbcDate extends AbstractJdbcType<Date> {
     }
 
     public int getJdbcType() {
-        return Types.TIMESTAMP;
+        return Types.DATE;
     }
 
     public Date compose(Object value) {
@@ -92,7 +78,6 @@ public class JdbcDate extends AbstractJdbcType<Date> {
     }
 
     public Object decompose(Date value) {
-        return (value == null) ? null : (Object) value;
+        return value;
     }
-
 }

@@ -30,6 +30,7 @@ import com.datastax.driver.core.Metadata;
 class CassandraDatabaseMetaData implements DatabaseMetaData {
     private CassandraConnection connection;
     private CassandraStatement statement;
+    @SuppressWarnings("unused")
     private Metadata metadata;
 
     public CassandraDatabaseMetaData(CassandraConnection connection) throws SQLException {

@@ -15,24 +15,27 @@
 package com.github.adejanovski.cassandra.jdbc;
 
 import java.nio.ByteBuffer;
+import java.sql.Time;
 import java.sql.Types;
 
-public class JdbcDouble extends AbstractJdbcType<Double> {
-    public static final JdbcDouble instance = new JdbcDouble();
+public class JdbcTime extends AbstractJdbcType<Time> {
 
-    JdbcDouble() {
+    public static final JdbcTime instance = new JdbcTime();
+
+    JdbcTime() {
     }
 
     public boolean isCaseSensitive() {
         return false;
     }
 
-    public int getScale(Double obj) {
-        return 300;
+    public int getScale(Time obj) {
+        return -1;
     }
 
-    public int getPrecision(Double obj) {
-        return 15;
+    public int getPrecision(Time obj) {
+        // format is always 'hh:mm:ss[.SSSSSS]'
+        return (obj == null) ? 15 : toString(obj).length();
     }
 
     public boolean isCurrency() {
@@ -40,11 +43,11 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
     }
 
     public boolean isSigned() {
-        return true;
+        return false;
     }
 
-    public String toString(Double obj) {
-        return (obj == null) ? null : obj.toString();
+    public String toString(Time obj) {
+        return Utils.formatTime(obj);
     }
 
     public boolean needsQuotes() {
@@ -56,25 +59,25 @@ public class JdbcDouble extends AbstractJdbcType<Double> {
             return null;
         } else if (bytes.remaining() != 8) {
             throw new MarshalException(
-                    "A double is exactly 8 bytes: " + bytes.remaining());
+                    "A time is exactly 8 bytes (stored as an long): " + bytes.remaining());
         }
 
-        return toString(bytes.getDouble(bytes.position()));
+        return toString(new Time(bytes.getLong(bytes.position())));
     }
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class<Time> getType() {
+        return Time.class;
     }
 
     public int getJdbcType() {
-        return Types.DOUBLE;
+        return Types.TIME;
     }
 
-    public Double compose(Object value) {
-        return (Double) value;
+    public Time compose(Object value) {
+        return (Time) value;
     }
 
-    public Object decompose(Double value) {
+    public Object decompose(Time value) {
         return value;
     }
 }

@@ -14,11 +14,9 @@
  */
 package com.github.adejanovski.cassandra.jdbc;
 
-import java.nio.charset.Charset;
 import java.sql.Types;
 
 public class JdbcUTF8 extends AbstractJdbcType<String> {
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
     public static final JdbcUTF8 instance = new JdbcUTF8();
 
     public JdbcUTF8() {
@@ -33,7 +31,7 @@ public class JdbcUTF8 extends AbstractJdbcType<String> {
     }
 
     public int getPrecision(String obj) {
-        return -1;
+        return (obj == null) ? Integer.MAX_VALUE : obj.length();
     }
 
     public boolean isCurrency() {
@@ -53,7 +51,7 @@ public class JdbcUTF8 extends AbstractJdbcType<String> {
     }
 
     public String getString(Object bytes) {
-        return bytes.toString();
+        return (bytes == null) ? null : bytes.toString();
     }
 
     public Class<String> getType() {
@@ -69,6 +67,6 @@ public class JdbcUTF8 extends AbstractJdbcType<String> {
     }
 
     public Object decompose(String value) {
-        return (Object) value;
+        return value;
     }
 }

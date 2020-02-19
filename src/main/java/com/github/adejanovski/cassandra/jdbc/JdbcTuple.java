@@ -45,8 +45,7 @@ public class JdbcTuple extends AbstractJdbcType<TupleValue> {
     }
 
     public String getString(Object obj) {
-        return obj.toString();
-
+        return (obj == null) ? null : obj.toString();
     }
 
     public Class<TupleValue> getType() {
@@ -62,7 +61,7 @@ public class JdbcTuple extends AbstractJdbcType<TupleValue> {
     }
 
     public Object decompose(TupleValue value) {
-        return (Object) value;
+        return value;
     }
 
     @Override

@@ -35,6 +35,7 @@ public class Pair<T1, T2> {
     public final boolean equals(Object o) {
         if (!(o instanceof Pair))
             return false;
+        @SuppressWarnings("rawtypes")
         Pair that = (Pair) o;
         // handles nulls properly
         return Objects.equal(left, that.left) && Objects.equal(right, that.right);

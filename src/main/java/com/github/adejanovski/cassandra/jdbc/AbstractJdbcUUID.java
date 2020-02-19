@@ -31,7 +31,8 @@ public abstract class AbstractJdbcUUID extends AbstractJdbcType<UUID> {
     }
 
     public int getPrecision(UUID obj) {
-        return -1;
+        // format is always 32 hex digits + 4 dashes.
+        return (obj == null) ? 36 : toString(obj).length();
     }
 
     public boolean isCurrency() {
