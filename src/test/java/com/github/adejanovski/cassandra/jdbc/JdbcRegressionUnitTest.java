@@ -438,7 +438,7 @@ public class JdbcRegressionUnitTest {
 
     }
 
-    @Test
+    @Test(enabled=false)
     public void testIssue75() throws Exception {
         System.out.println();
         System.out.println("Test Issue #75");
@@ -504,7 +504,7 @@ public class JdbcRegressionUnitTest {
         AssertJUnit.assertTrue("Make sure we have found an column", result.next());
     }
 
-    @Test
+    @Test(enabled=false)
     public void testIssue80() throws Exception {
 
         System.out.println();
@@ -975,7 +975,7 @@ public class JdbcRegressionUnitTest {
         con.isValid(-42);
     }
 
-    @Test
+    @Test(enabled=false)
     public void testTimestampToLongCodec() throws Exception {
         System.out.println();
         System.out.println("Test testTimestampToLongCodec");

@@ -45,6 +45,7 @@
 		<gpg.useagent>true</gpg.useagent>
 		<cassandra.host>localhost</cassandra.host>
 		<datastax.java.driver.version>3.7.0</datastax.java.driver.version>
+    <jacoco.version>0.8.5</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -364,18 +365,12 @@
 					<plugin>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<version>2.17</version>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
 						<executions>
 							<execution>
 								<phase>test</phase>
 								<goals>
 									<goal>test</goal>
 								</goals>
-								<configuration>
-									<skip>true</skip>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -415,7 +410,33 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
 						<version>2.10.3</version>
-					</plugin>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>post-unit-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <!-- Sets the path to the file which contains the execution data. -->
+                  <dataFile>target/jacoco.exec</dataFile>
+                  <!-- Sets the output directory for the code coverage report. -->
+                  <outputDirectory>target/jacoco-ut</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
 				</plugins>
 			</build>
 		</profile>
