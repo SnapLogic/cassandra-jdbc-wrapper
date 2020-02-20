@@ -1244,7 +1244,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
 
         public int getPrecision(int column) throws SQLException {
             DataType type = getDataType(column);
-            DataTypeEnum name = DataTypeEnum.fromJdbcType(type.getClass());
+            DataTypeEnum name = DataTypeEnum.fromCqlTypeName(type.getName());
             if (name != null) {
                 return name.getPrecision();
             }
@@ -1282,7 +1282,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
 
         public boolean isCaseSensitive(int column) throws SQLException {
             DataType type = getDataType(column);
-            DataTypeEnum name = DataTypeEnum.fromJdbcType(type.getClass());
+            DataTypeEnum name = DataTypeEnum.fromCqlTypeName(type.getName());
             if (name != null) {
                 return name.jdbcType.isCaseSensitive();
             }
@@ -1292,7 +1292,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
 
         public boolean isCurrency(int column) throws SQLException {
             DataType type = getDataType(column);
-            DataTypeEnum name = DataTypeEnum.fromJdbcType(type.getClass());
+            DataTypeEnum name = DataTypeEnum.fromCqlTypeName(type.getName());
             if (name != null) {
                 return name.jdbcType.isCurrency();
             }
@@ -1325,7 +1325,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
 
         public boolean isSigned(int column) throws SQLException {
             DataType type = getDataType(column);
-            DataTypeEnum name = DataTypeEnum.fromJdbcType(type.getClass());
+            DataTypeEnum name = DataTypeEnum.fromCqlTypeName(type.getName());
             if (name != null) {
                 return name.jdbcType.isSigned();
             }

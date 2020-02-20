@@ -438,7 +438,7 @@ public class JdbcRegressionUnitTest {
 
     }
 
-    @Test(enabled=false)
+    @Test
     public void testIssue75() throws Exception {
         System.out.println();
         System.out.println("Test Issue #75");
