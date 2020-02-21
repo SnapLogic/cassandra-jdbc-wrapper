@@ -980,7 +980,7 @@ public class JdbcRegressionUnitTest {
         con.isValid(-42);
     }
 
-    @Test(enabled=false)
+    @Test
     public void testTimestampToLongCodec() throws Exception {
         System.out.println();
         System.out.println("Test testTimestampToLongCodec");
