@@ -16,7 +16,13 @@ package com.github.adejanovski.cassandra.jdbc;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
 
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -175,4 +181,90 @@ public class UtilsUnitTest {
         assertEquals(happypath, Utils.PROTOCOL + result);
     }
 
+    @Test
+    public void testParseDate() throws Exception {
+      assertNull(Utils.parseDate(null));
+      assertNull(Utils.parseDate(""));
+
+      Date d = Utils.parseDate("2020-01-15");
+      assertEquals(Utils.formatDate(d), "2020-01-15");
+
+      try {
+          Utils.parseDate("bad-date");
+          fail();
+      } catch (SQLException expected) {
+          assertEquals(expected.getMessage(), Utils.BAD_DATE_FORMAT);
+      }
+    }
+
+    @Test
+    public void testParseTime() throws Exception {
+      assertNull(Utils.parseTime(null));
+      assertNull(Utils.parseTime(""));
+
+      String input[] = {
+        "15:26:00",
+        "00:30:45.1234567"
+      };
+
+      String expected[] = {
+        "15:26:00",
+        "00:30:45" // java.sql.Time truncates to second.
+      };
+
+      for (int i=0; i < input.length; ++i) {
+        Time t = Utils.parseTime(input[i]);
+        assertEquals(Utils.formatTime(t), expected[i]);
+      }
+
+      try {
+          Utils.parseTime("bad-time");
+          fail();
+      } catch (SQLException ex) {
+          assertEquals(ex.getMessage(), Utils.BAD_TIME_FORMAT);
+      }
+    }
+
+    @Test
+    public void testParseTimestamp() throws Exception {
+      assertNull(Utils.parseTimestamp(null));
+      assertNull(Utils.parseTimestamp(""));
+
+      // interpret date time without timezone as UTC.
+      String input[] = {
+        "2020-01-10",
+        "2020-01-10 05:30",
+        "2020-01-10 05:30:15",
+        "2020-01-10T05:30:15.123",
+        "2020-01-10T05:30:15.123-0800",
+        "2020-01-10T05:30:15.123+0000",
+        "2020-01-10T05:30:15+0100",
+        "2020-01-10T05:30:15.123+0130",
+        "1999-11-23T23:59:59.999",
+      };
+
+      String expected[] = {
+        "2020-01-10T00:00:00Z",
+        "2020-01-10T05:30:00Z",
+        "2020-01-10T05:30:15Z",
+        "2020-01-10T05:30:15.123Z",
+        "2020-01-10T13:30:15.123Z",   // -0800
+        "2020-01-10T05:30:15.123Z",   // +0000
+        "2020-01-10T04:30:15Z",       // +0100
+        "2020-01-10T04:00:15.123Z",   // +0130
+        "1999-11-23T23:59:59.999Z",
+      };
+
+      for (int i=0; i < input.length; ++i) {
+        Timestamp ts = Utils.parseTimestamp(input[i]);
+        assertEquals(Utils.formatTimestampAsEpoch(ts), expected[i]);
+      }
+
+      try {
+          Utils.parseTimestamp("bad-timestamp");
+          fail();
+      } catch (SQLException ex) {
+          assertEquals(ex.getMessage(), Utils.BAD_TIMESTAMP_FORMAT);
+      }
+    }
 }

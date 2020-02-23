@@ -227,7 +227,6 @@
                   <goal>test</goal>
                 </goals>
                 <configuration>
-                  <skip>true</skip>
                   <includes>
                     <include>**/*UnitTest.class</include>
                   </includes>
@@ -239,9 +238,6 @@
                 </configuration>
               </execution>
             </executions>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
           </plugin>
           <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
@@ -277,6 +273,30 @@
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>2.10.3</version>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.5</version>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>post-unit-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>target/jacoco.exec</dataFile>
+                  <outputDirectory>target/jacoco-ut</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -407,13 +427,14 @@
   </dependencies>
   <properties>
     <sourceReleaseAssemblyDescriptor>source-release</sourceReleaseAssemblyDescriptor>
+    <cassandra.host>localhost</cassandra.host>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <datastax.java.driver.version>3.7.0</datastax.java.driver.version>
-    <cassandra.host>localhost</cassandra.host>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jacoco.version>0.8.5</jacoco.version>
     <gpg.useagent>true</gpg.useagent>
     <cassandra.version>2.1.9</cassandra.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>
 

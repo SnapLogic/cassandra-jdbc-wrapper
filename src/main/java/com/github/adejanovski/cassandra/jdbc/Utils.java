@@ -15,6 +15,7 @@
 
 package com.github.adejanovski.cassandra.jdbc;
 
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -34,6 +35,14 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -44,7 +53,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,17 +168,8 @@ public class Utils {
 
     // ISO-8601 patterns
     // @formatter:off
-    protected static final String TIMESTAMP_FORMATS[] = {
-        // without timezone
-        "yyyy-MM-dd HH:mm:ss",
-        "yyyy-MM-dd[(T | )]HH:mm:ss[.SSS]",
-        "yyyy-MM-dd[(T | )]HH:mm",
-        "yyyy-MM-dd",
-        // with timezone
-        "yyyy-MM-dd[(T| )]HH:mm:ss[.SSS]XXX",
-        "yyyy-MM-dd[(T| )]HH:mmXXX",
-        "yyyy-MM-ddXXX"
-    };
+    protected static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    protected static final String TIMESTAMP_PARSE_FORMAT = "yyyy-MM-dd[[ ]['T']HH:mm[:ss][.SSS][XX]]";
     // @formatter:on
 
     protected static final Logger logger = LoggerFactory.getLogger(Utils.class);
@@ -932,17 +931,34 @@ public class Utils {
             return null;
         }
 
-        for (String format : TIMESTAMP_FORMATS) {
-            DateFormat df = new SimpleDateFormat(format);
-            try {
-                return new Timestamp(df.parse(value).getTime());
-            } catch (ParseException e) {
-                // ignore for now
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TIMESTAMP_PARSE_FORMAT);
+
+            TemporalAccessor ta = formatter.parseBest(value,
+                OffsetDateTime::from, LocalDateTime::from, java.time.LocalDate::from);
+
+            if (ta instanceof OffsetDateTime) {
+                Instant instant = ((OffsetDateTime)ta).toInstant();	
+                return new Timestamp(instant.toEpochMilli());
             }
+            //else if (ta instanceof ZonedDateTime) {
+                //Instant instant = ((ZonedDateTime)ta).toInstant();	
+                //return new Timestamp(instant.toEpochMilli());
+            //}
+            else if (ta instanceof LocalDateTime) {
+                //Instant instant = ((LocalDateTime)ta).atZone(ZoneId.systemDefault()).toInstant();	
+                Instant instant = ((LocalDateTime)ta).atZone(ZoneOffset.UTC).toInstant();	
+                return new Timestamp(instant.toEpochMilli());
+            }
+            else if (ta instanceof LocalDate) {
+                //Instant instant = ((LocalDate)ta).atStartOfDay(ZoneId.systemDefault()).toInstant();	
+                Instant instant = ((LocalDate)ta).atStartOfDay(ZoneOffset.UTC).toInstant();	
+                return new Timestamp(instant.toEpochMilli());
+            }
+        } catch (DateTimeParseException e) {
+            // ignore for now
         }
 
-        Timestamp.valueOf(value);
-        // none of the patterns match.
         throw new SQLException(BAD_TIMESTAMP_FORMAT);
     }
 
@@ -953,8 +969,11 @@ public class Utils {
         if (value == null) {
             return null;
         }
+        return (new SimpleDateFormat(TIMESTAMP_FORMAT)).format(value);
+    }
 
-        return (new SimpleDateFormat(TIMESTAMP_FORMATS[0])).format(value);
+    public static String formatTimestampAsEpoch(Timestamp value) {
+        return DateTimeFormatter.ISO_INSTANT.format(value.toInstant());
     }
 
     /**
@@ -964,7 +983,6 @@ public class Utils {
         if (value == null) {
             return null;
         }
-
-        return (new SimpleDateFormat(TIMESTAMP_FORMATS[0])).format(value);
+        return (new SimpleDateFormat(TIMESTAMP_FORMAT)).format(value);
     }
 }
