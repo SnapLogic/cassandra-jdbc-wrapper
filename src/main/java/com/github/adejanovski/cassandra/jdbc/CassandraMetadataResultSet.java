@@ -139,7 +139,7 @@ import com.google.common.collect.Lists;
  * <tr>
  * <td>tinyint</td>
  * <td>Byte</td>
- * <td>A timestamp</td>
+ * <td>A byte</td>
  * </tr>
  * <tr>
  * <td>uuid</td>

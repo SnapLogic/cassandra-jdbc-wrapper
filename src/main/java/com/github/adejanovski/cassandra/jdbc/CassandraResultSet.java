@@ -1255,6 +1255,8 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         }
 
         public int getScale(int column) throws SQLException {
+            //BEAR: maybe ok to return 0 for metadata inquiries?
+
             //DataType type = getDataType(column);
             //DataTypeEnum e = DataTypeEnum.fromCqlTypeName(type.getName());
             //if (e.jdbcType != null) {

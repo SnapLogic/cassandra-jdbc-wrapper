@@ -314,4 +314,215 @@ public class MetadataResultSetsUnitTest {
 
     }
 
+    @Test
+    public void testNumericTypesMetadata() throws Exception {
+
+        System.out.println();
+        System.out.println("Numeric Types metadata test");
+        System.out.println("--------------");
+
+        Statement stmt = con.createStatement();
+
+        String createNumericTypesTable = "CREATE TABLE " + KEYSPACE1
+            + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key," 
+            + " bigintcol bigint, variantcol varint, decimalcol decimal, floatcol float, doublecol double);";
+
+        stmt.execute(createNumericTypesTable);
+        stmt.close();
+
+        Statement statement = con.createStatement();
+        String insert = "INSERT INTO " + KEYSPACE1
+            + ".numerictypes(tinyintcol, smallintcol, intcol, bigintcol, variantcol, decimalcol, floatcol, doublecol)"
+            + " VALUES (127, 32767, 2147483647, 9223372036854775807, 2147483647, 12.34, 12.23, 12.23);";
+
+        ResultSet result = statement.executeQuery(insert);
+
+        result = statement.executeQuery("select * from " + KEYSPACE1 + ".numerictypes");
+
+        assertTrue(result.next());
+        assertEquals(8, result.getMetaData().getColumnCount());
+
+        // columns are ordered alphabetically, key column first (ie, not projection order)
+        int i = 1;
+        ResultSetMetaData rsmd = result.getMetaData();
+
+        // column #1: intcol int primary key
+        JdbcInt jdbcInt = new JdbcInt();
+        assertEquals("intcol", rsmd.getColumnName(i));
+        assertEquals(jdbcInt.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcInt.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcInt.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("int", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcInt.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcInt.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcInt.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #2: bigintcol bigint
+        JdbcLong jdbcLong = new JdbcLong();
+        assertEquals("bigintcol", rsmd.getColumnName(i));
+        assertEquals(jdbcLong.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcLong.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcLong.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("bigint", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcLong.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcLong.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcLong.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #3: decimalcol decimal
+        JdbcDecimal jdbcDecimal = new JdbcDecimal();
+        assertEquals("decimalcol", rsmd.getColumnName(i));
+        assertEquals(jdbcDecimal.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(40, rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcDecimal.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("decimal", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcDecimal.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcDecimal.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcDecimal.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #4: doublecol double
+        JdbcDouble jdbcDouble = new JdbcDouble();
+        assertEquals("doublecol", rsmd.getColumnName(i));
+        assertEquals(jdbcDouble.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcDouble.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcDouble.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("double", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcDouble.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcDouble.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcDouble.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #5: floatcol float
+        JdbcFloat jdbcFloat = new JdbcFloat();
+        assertEquals("floatcol", rsmd.getColumnName(i));
+        assertEquals(jdbcFloat.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcFloat.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcFloat.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("float", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcFloat.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcFloat.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcFloat.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #6: smallintcol smallint
+        JdbcShort jdbcShort = new JdbcShort();
+        assertEquals("smallintcol", rsmd.getColumnName(i));
+        assertEquals(jdbcShort.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcShort.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcShort.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("smallint", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcShort.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcShort.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcShort.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #7: tinyintcol tinyint
+        JdbcByte jdbcByte = new JdbcByte();
+        assertEquals("tinyintcol", rsmd.getColumnName(i));
+        assertEquals(jdbcByte.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcByte.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcByte.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("tinyint", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcByte.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcByte.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcByte.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #8: variantcol varint
+        JdbcBigInteger jdbcBigInteger = new JdbcBigInteger();
+        assertEquals("variantcol", rsmd.getColumnName(i));
+        assertEquals(jdbcBigInteger.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(40, rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcBigInteger.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("varint", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcBigInteger.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcBigInteger.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcBigInteger.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        statement.close();
+    }
+
+    @Test
+    public void testDateTimeTypesMetadata() throws Exception {
+
+        System.out.println();
+        System.out.println("DateTime Types metadata test");
+        System.out.println("--------------");
+
+        Statement stmt = con.createStatement();
+
+        String createDateTimeTypesTable = "CREATE TABLE " + KEYSPACE1
+            + ".datetimetypes(datecol date primary key, timecol time, timestampcol timestamp);";
+
+        stmt.execute(createDateTimeTypesTable);
+        stmt.close();
+
+        Statement statement = con.createStatement();
+        String insert = "INSERT INTO " + KEYSPACE1
+            + ".datetimetypes(datecol, timecol, timestampcol)"
+            + " VALUES ('2018-01-31', '23:00:00.999', '2015-05-03 13:30:54.234-0800');";
+
+        ResultSet result = statement.executeQuery(insert);
+
+        result = statement.executeQuery("select * from " + KEYSPACE1 + ".datetimetypes");
+
+        assertTrue(result.next());
+        assertEquals(3, result.getMetaData().getColumnCount());
+
+        // columns are ordered alphabetically, key column first (ie, not projection order)
+        int i = 1;
+        ResultSetMetaData rsmd = result.getMetaData();
+
+        // column #1: datecol date primary key
+        JdbcDate jdbcDate = new JdbcDate();
+        assertEquals("datecol", rsmd.getColumnName(i));
+        assertEquals(jdbcDate.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcDate.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcDate.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("date", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcDate.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcDate.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcDate.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #2: timecol time
+        JdbcTime jdbcTime = new JdbcTime();
+        assertEquals("timecol", rsmd.getColumnName(i));
+        assertEquals(jdbcTime.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcTime.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcTime.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("time", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcTime.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcTime.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcTime.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        // column #3: timestampcol timestamp
+        JdbcTimestamp jdbcTimestamp = new JdbcTimestamp();
+        assertEquals("timestampcol", rsmd.getColumnName(i));
+        assertEquals(jdbcTimestamp.getType().getCanonicalName(), rsmd.getColumnClassName(i));
+        assertEquals(jdbcTimestamp.getPrecision(null), rsmd.getColumnDisplaySize(i));
+        assertEquals(jdbcTimestamp.getJdbcType(), rsmd.getColumnType(i));
+        assertEquals("timestamp", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getScale(i));
+        assertEquals(jdbcTimestamp.isCaseSensitive(), rsmd.isCaseSensitive(i));
+        assertEquals(jdbcTimestamp.isCurrency(), rsmd.isCurrency(i));
+        assertEquals(jdbcTimestamp.isSigned(), rsmd.isSigned(i));
+        i++;
+
+        statement.close();
+    }
 }

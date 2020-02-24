@@ -56,7 +56,7 @@ public class JdbcByte extends AbstractJdbcType<Byte> {
             return null;
         } else if (bytes.remaining() != 1) {
             throw new MarshalException(
-                    "A date is exactly 1 byte: " + bytes.remaining());
+                    "A byte is exactly 1 byte: " + bytes.remaining());
         }
 
         return toString(compose(bytes));
