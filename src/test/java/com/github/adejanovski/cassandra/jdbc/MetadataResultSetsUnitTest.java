@@ -325,14 +325,14 @@ public class MetadataResultSetsUnitTest {
 
         String createNumericTypesTable = "CREATE TABLE " + KEYSPACE1
             + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key," 
-            + " bigintcol bigint, variantcol varint, decimalcol decimal, floatcol float, doublecol double);";
+            + " bigintcol bigint, varintcol varint, decimalcol decimal, floatcol float, doublecol double);";
 
         stmt.execute(createNumericTypesTable);
         stmt.close();
 
         Statement statement = con.createStatement();
         String insert = "INSERT INTO " + KEYSPACE1
-            + ".numerictypes(tinyintcol, smallintcol, intcol, bigintcol, variantcol, decimalcol, floatcol, doublecol)"
+            + ".numerictypes(tinyintcol, smallintcol, intcol, bigintcol, varintcol, decimalcol, floatcol, doublecol)"
             + " VALUES (127, 32767, 2147483647, 9223372036854775807, 2147483647, 12.34, 12.23, 12.23);";
 
         ResultSet result = statement.executeQuery(insert);
@@ -437,9 +437,9 @@ public class MetadataResultSetsUnitTest {
         assertEquals(jdbcByte.isSigned(), rsmd.isSigned(i));
         i++;
 
-        // column #8: variantcol varint
+        // column #8: varintcol varint
         JdbcBigInteger jdbcBigInteger = new JdbcBigInteger();
-        assertEquals("variantcol", rsmd.getColumnName(i));
+        assertEquals("varintcol", rsmd.getColumnName(i));
         assertEquals(jdbcBigInteger.getType().getCanonicalName(), rsmd.getColumnClassName(i));
         assertEquals(40, rsmd.getColumnDisplaySize(i));
         assertEquals(jdbcBigInteger.getJdbcType(), rsmd.getColumnType(i));

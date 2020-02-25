@@ -39,6 +39,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -946,13 +947,11 @@ public class Utils {
                 //return new Timestamp(instant.toEpochMilli());
             //}
             else if (ta instanceof LocalDateTime) {
-                //Instant instant = ((LocalDateTime)ta).atZone(ZoneId.systemDefault()).toInstant();	
-                Instant instant = ((LocalDateTime)ta).atZone(ZoneOffset.UTC).toInstant();	
+                Instant instant = ((LocalDateTime)ta).atZone(ZoneId.systemDefault()).toInstant();	
                 return new Timestamp(instant.toEpochMilli());
             }
             else if (ta instanceof LocalDate) {
-                //Instant instant = ((LocalDate)ta).atStartOfDay(ZoneId.systemDefault()).toInstant();	
-                Instant instant = ((LocalDate)ta).atStartOfDay(ZoneOffset.UTC).toInstant();	
+                Instant instant = ((LocalDate)ta).atStartOfDay(ZoneId.systemDefault()).toInstant();	
                 return new Timestamp(instant.toEpochMilli());
             }
         } catch (DateTimeParseException e) {

@@ -230,7 +230,7 @@ public class UtilsUnitTest {
       assertNull(Utils.parseTimestamp(null));
       assertNull(Utils.parseTimestamp(""));
 
-      // interpret date time without timezone as UTC.
+      // interpret date time without timezone as local time 
       String input[] = {
         "2020-01-10",
         "2020-01-10 05:30",
@@ -240,19 +240,20 @@ public class UtilsUnitTest {
         "2020-01-10T05:30:15.123+0000",
         "2020-01-10T05:30:15+0100",
         "2020-01-10T05:30:15.123+0130",
-        "1999-11-23T23:59:59.999",
+        "1999-11-23T23:59:59.999"
       };
 
+      // database stores time in utc
       String expected[] = {
-        "2020-01-10T00:00:00Z",
-        "2020-01-10T05:30:00Z",
-        "2020-01-10T05:30:15Z",
-        "2020-01-10T05:30:15.123Z",
+        "2020-01-10T08:00:00Z",
+        "2020-01-10T13:30:00Z",
+        "2020-01-10T13:30:15Z",
+        "2020-01-10T13:30:15.123Z",
         "2020-01-10T13:30:15.123Z",   // -0800
         "2020-01-10T05:30:15.123Z",   // +0000
         "2020-01-10T04:30:15Z",       // +0100
         "2020-01-10T04:00:15.123Z",   // +0130
-        "1999-11-23T23:59:59.999Z",
+        "1999-11-24T07:59:59.999Z"
       };
 
       for (int i=0; i < input.length; ++i) {
