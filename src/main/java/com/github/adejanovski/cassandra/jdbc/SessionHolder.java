@@ -201,16 +201,16 @@ class SessionHolder {
         // Declare and register codecs
         List<TypeCodec<?>> codecs = new ArrayList<TypeCodec<?>>();
         CodecRegistry customizedRegistry = new CodecRegistry();
-        
+
         codecs.add(new TimestampToLongCodec(Long.class));
         codecs.add(new LongToIntCodec(Integer.class));
         codecs.add(new IntToLongCodec(Long.class));
         codecs.add(new BigDecimalToBigintCodec(BigDecimal.class));
         codecs.add(new DoubleToDecimalCodec(Double.class));
         codecs.add(new DoubleToFloatCodec(Double.class));
-        
+
         customizedRegistry.register(codecs);
-        
+
         builder.withCodecRegistry(customizedRegistry);
         // end of codec register
 

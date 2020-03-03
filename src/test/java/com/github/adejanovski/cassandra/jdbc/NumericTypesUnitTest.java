@@ -60,7 +60,7 @@ public class NumericTypesUnitTest {
         HOST = CCMBridge.ipOfNode(1);
 
         Class.forName("com.github.adejanovski.cassandra.jdbc.CassandraDriver");
-        String URL = String.format("jdbc:cassandra://%s:%d/%s?version=%s", 
+        String URL = String.format("jdbc:cassandra://%s:%d/%s?version=%s",
             HOST, PORT, SYSTEM, CQLV3);
 
         con = DriverManager.getConnection(URL);
@@ -93,7 +93,7 @@ public class NumericTypesUnitTest {
         stmt.execute(useKS);
 
         String createNumericTypesTable = "CREATE TABLE " + KEYSPACE
-            + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key," 
+            + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key,"
             + " bigintcol bigint, varintcol varint, decimalcol decimal, floatcol float, doublecol double);";
 
         if (LOG.isDebugEnabled())

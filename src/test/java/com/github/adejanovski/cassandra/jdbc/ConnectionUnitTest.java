@@ -85,7 +85,7 @@ public class ConnectionUnitTest {
         con.close();
 
         System.out.println("Connecting to : " + String.format(
-            "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=DCAwareRoundRobinPolicy('%s')", 
+            "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=DCAwareRoundRobinPolicy('%s')",
             HOST, PORT, KEYSPACE, DATACENTER));
 
         con = DriverManager.getConnection(String.format(
@@ -95,7 +95,7 @@ public class ConnectionUnitTest {
         con.close();
 
         System.out.println( "Connecting to : " + String.format(
-            "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=TokenAwarePolicy(DCAwareRoundRobinPolicy('%s'))", 
+            "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=TokenAwarePolicy(DCAwareRoundRobinPolicy('%s'))",
             HOST, PORT, KEYSPACE, DATACENTER));
 
         con = DriverManager.getConnection(String.format(

@@ -263,7 +263,7 @@ public class Utils {
 
     /**
      * Create a "Subname" portion of a JDBC URL from properties.
-     * 
+     *
      * @param props A Properties file containing all the properties to be considered.
      * @return A constructed "Subname" portion of a JDBC URL in the form of a CLI (ie:
      *         //myhost:9160/Test1?version=3.0.0 )
@@ -335,7 +335,7 @@ public class Utils {
     // Utility method
     /**
      * Utility method to pack bytes into a byte buffer from a list of ByteBuffers
-     * 
+     *
      * @param buffers A list of ByteBuffers representing the elements to pack
      * @param elements The count of the elements
      * @param size The size in bytes of the result buffer
@@ -939,19 +939,19 @@ public class Utils {
                 OffsetDateTime::from, LocalDateTime::from, java.time.LocalDate::from);
 
             if (ta instanceof OffsetDateTime) {
-                Instant instant = ((OffsetDateTime)ta).toInstant();	
+                Instant instant = ((OffsetDateTime)ta).toInstant();
                 return new Timestamp(instant.toEpochMilli());
             }
             //else if (ta instanceof ZonedDateTime) {
-                //Instant instant = ((ZonedDateTime)ta).toInstant();	
+                //Instant instant = ((ZonedDateTime)ta).toInstant();
                 //return new Timestamp(instant.toEpochMilli());
             //}
             else if (ta instanceof LocalDateTime) {
-                Instant instant = ((LocalDateTime)ta).atZone(ZoneId.systemDefault()).toInstant();	
+                Instant instant = ((LocalDateTime)ta).atZone(ZoneId.systemDefault()).toInstant();
                 return new Timestamp(instant.toEpochMilli());
             }
             else if (ta instanceof LocalDate) {
-                Instant instant = ((LocalDate)ta).atStartOfDay(ZoneId.systemDefault()).toInstant();	
+                Instant instant = ((LocalDate)ta).atStartOfDay(ZoneId.systemDefault()).toInstant();
                 return new Timestamp(instant.toEpochMilli());
             }
         } catch (DateTimeParseException e) {

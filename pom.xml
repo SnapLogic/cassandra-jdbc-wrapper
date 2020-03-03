@@ -55,7 +55,7 @@
 			<version>1.7.29</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency> 
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.28</version>
@@ -258,7 +258,7 @@
 					<version>1.2.1-1</version>
 				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -300,7 +300,7 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<version>2.4.0</version>
-				<!-- <executions> <execution> <id>bundle-manifest</id> <phase>process-classes</phase> 
+				<!-- <executions> <execution> <id>bundle-manifest</id> <phase>process-classes</phase>
 					<goals> <goal>manifest</goal> </goals> </execution> </executions> -->
 				<configuration>
 					<instructions>

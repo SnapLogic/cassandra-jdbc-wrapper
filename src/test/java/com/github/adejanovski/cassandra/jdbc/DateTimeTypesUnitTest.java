@@ -14,9 +14,6 @@
  */
 package com.github.adejanovski.cassandra.jdbc;
 
-import static java.lang.String.format; 
-import static org.testng.AssertJUnit.assertEquals;
-
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -33,6 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static java.lang.String.format;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * Test CQL Date/Time Data Types
@@ -68,7 +68,7 @@ public class DateTimeTypesUnitTest {
         HOST = CCMBridge.ipOfNode(1);
 
         Class.forName("com.github.adejanovski.cassandra.jdbc.CassandraDriver");
-        String URL = String.format("jdbc:cassandra://%s:%d/%s?version=%s", 
+        String URL = String.format("jdbc:cassandra://%s:%d/%s?version=%s",
             HOST, PORT, SYSTEM, CQLV3);
 
         con = DriverManager.getConnection(URL);
@@ -145,8 +145,8 @@ public class DateTimeTypesUnitTest {
         long dbEpochMilli = ((com.datastax.driver.core.LocalDate)result.getObject(DATECOL_IDX))
             .getMillisSinceEpoch();
 
-        Instant instant = date.atStartOfDay(ZoneOffset.UTC).toInstant();	
-        
+        Instant instant = date.atStartOfDay(ZoneOffset.UTC).toInstant();
+
         assertEquals(instant.toEpochMilli(), dbEpochMilli);
 
         stmt.close();
@@ -164,7 +164,7 @@ public class DateTimeTypesUnitTest {
 
             if (LOG.isDebugEnabled()) LOG.debug(format("[%s]", formatDuration(d)));
 
-            String insert = format("INSERT INTO datetimetypes (intcol, timecol) VALUES (%d, '%s');", 
+            String insert = format("INSERT INTO datetimetypes (intcol, timecol) VALUES (%d, '%s');",
                 i, formatDuration(d));
             stmt.executeUpdate(insert);
 
@@ -174,7 +174,7 @@ public class DateTimeTypesUnitTest {
 
             Time dbTime = (Time) result.getObject(TIMECOL_IDX);
 
-            assertEquals(Instant.ofEpochMilli(d.toMillis()).toEpochMilli(), 
+            assertEquals(Instant.ofEpochMilli(d.toMillis()).toEpochMilli(),
                 dbTime.getTime());
         }
 
@@ -184,7 +184,7 @@ public class DateTimeTypesUnitTest {
     @Test
     public void testTimestampDataType() throws Exception {
 
-        String[] timestamps = { 
+        String[] timestamps = {
             "2020-01-10",
             "2020-01-10 05:30",
             "2020-01-10 05:30:15",
@@ -204,7 +204,7 @@ public class DateTimeTypesUnitTest {
             if (LOG.isDebugEnabled()) LOG.debug(format("[%s]", timestamp));
 
             String insert = format(
-                "INSERT INTO datetimetypes (intcol, timestampcol) VALUES (%d, '%s');", 
+                "INSERT INTO datetimetypes (intcol, timestampcol) VALUES (%d, '%s');",
                 i, timestamp);
             stmt.executeUpdate(insert);
 
@@ -225,7 +225,7 @@ public class DateTimeTypesUnitTest {
         int nanosecs = dur.getNano();
 
         if (nanosecs != 0) {
-            return format("%02d:%02d:%02d.%03d", 
+            return format("%02d:%02d:%02d.%03d",
                 secs/3600, (secs % 3600)/60, (secs % 60), nanosecs);
         } else {
             return format("%02d:%02d:%02d", secs/3600, (secs % 3600)/60, (secs % 60));

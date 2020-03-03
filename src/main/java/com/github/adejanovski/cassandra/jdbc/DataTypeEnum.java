@@ -25,7 +25,6 @@ public enum DataTypeEnum {
     // @formatter:off
     CUSTOM(0, ByteBuffer.class, DataType.Name.CUSTOM, null),
     ASCII(1, String.class, DataType.Name.ASCII, JdbcAscii.instance),
-    //BEAR: should "bigint" be mapped to JdbcLong? 
     BIGINT(2, Long.class, DataType.Name.BIGINT, JdbcLong.instance),
     BLOB(3, ByteBuffer.class, DataType.Name.BLOB, JdbcBytes.instance),
     BOOLEAN(4, Boolean.class, DataType.Name.BOOLEAN, JdbcBoolean.instance),
@@ -38,7 +37,6 @@ public enum DataTypeEnum {
     TIMESTAMP(11, Timestamp.class, DataType.Name.TIMESTAMP, JdbcTimestamp.instance),
     UUID(12, UUID.class, DataType.Name.UUID, JdbcUUID.instance),
     VARCHAR(13, String.class, DataType.Name.VARCHAR, JdbcUTF8.instance),
-    //BEAR: should "varint" be mapped to JdbcBigInteger instead of null?
     VARINT(14, BigInteger.class, DataType.Name.VARINT, JdbcBigInteger.instance),
     TIMEUUID(15, UUID.class, DataType.Name.TIMEUUID, JdbcTimeUUID.instance),
     INET(16, InetAddress.class, DataType.Name.INET, JdbcInetAddress.instance),

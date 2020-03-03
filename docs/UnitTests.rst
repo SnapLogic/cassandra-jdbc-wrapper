@@ -1,7 +1,7 @@
 Cassandra JDBC Wrapper Unit Tests
 =================================
 
-The readme in project root briefly describes dependencies for running the 
+The readme in project root briefly describes dependencies for running the
 unit tests. This document explains this in a bit more detail and how to run
 them.
 
@@ -76,7 +76,7 @@ Tips & Tricks
 
 * Use `cqlsh` to inspect database
 
-    If you set a breakpoint in one of the tests, you can inspect data in 
+    If you set a breakpoint in one of the tests, you can inspect data in
     Cassandra using cqlsh. You can install with `pip install cql`.
 
     Here is an example of inspecting datetimetypes table after inserting this
@@ -99,7 +99,7 @@ Tips & Tricks
             cqlsh> use testks;
 
             cqlsh:testks> expand on;
-        
+
             cqlsh:testks> SELECT * FROM datetimetypes WHERE intcol = 1;
 
             @ Row 1
