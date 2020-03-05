@@ -92,14 +92,14 @@ public class NumericTypesUnitTest {
         stmt.execute(createKS);
         stmt.execute(useKS);
 
-        String createNumericTypesTable = "CREATE TABLE " + KEYSPACE
+        String createDecimalTypeTable = "CREATE TABLE " + KEYSPACE
             + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key,"
             + " bigintcol bigint, varintcol varint, decimalcol decimal, floatcol float, doublecol double);";
 
         if (LOG.isDebugEnabled())
-            LOG.debug("createTable = '{}'", createNumericTypesTable);
+            LOG.debug("createTable = '{}'", createDecimalTypeTable);
 
-        stmt.execute(createNumericTypesTable);
+        stmt.execute(createDecimalTypeTable);
         stmt.close();
         con.close();
 
@@ -167,5 +167,58 @@ public class NumericTypesUnitTest {
         assertEquals(Byte.MAX_VALUE, result.getObject(7));
 
         pstmt.close();
+    }
+
+    @Test
+    public void testDecimalType() throws Exception {
+
+        String createDecimalTypeTable = "CREATE TABLE " + KEYSPACE
+            + ".decimaltype(key int primary key, decimalcol decimal)";
+
+        try (Statement stmt = con.createStatement();) {
+            stmt.execute(createDecimalTypeTable);
+        }
+
+        String decimalValues[] = {
+            "0",
+            "0.123456789",
+            "0.1234567890123456789012345",
+            "10123456789",
+            "123.456",
+            "123456789",
+            "123456789.123456789"
+        };
+
+        String insert = "INSERT INTO " + KEYSPACE + ".decimaltype(key, decimalcol) values (?, ?);";
+
+        try (PreparedStatement pstmt = con.prepareStatement(insert);) {
+            for (int i=1; i <= decimalValues.length; ++i) {
+                pstmt.setInt(1, i);
+
+                // test setters (setObject, setBigDecimal)
+                if (i % 2 == 0) {
+                    pstmt.setBigDecimal(2, new BigDecimal(decimalValues[i-1]));
+                } else {
+                    pstmt.setObject(2, new BigDecimal(decimalValues[i-1]));
+                }
+                pstmt.execute();
+            }
+        }
+
+        try (Statement stmt = con.createStatement();) {
+            ResultSet result = stmt.executeQuery(
+                "select count(*) from " + KEYSPACE + ".decimaltype");
+            result.next();
+            assertEquals(decimalValues.length, result.getInt(1));   // row count
+
+            result = stmt.executeQuery(
+                "select * from " + KEYSPACE + ".decimaltype");
+
+            while(result.next()) {
+                int key = result.getInt(1);
+                BigDecimal expected = new BigDecimal(decimalValues[key-1]);
+                assertEquals(expected, result.getObject(2));
+            }
+        }
     }
 }

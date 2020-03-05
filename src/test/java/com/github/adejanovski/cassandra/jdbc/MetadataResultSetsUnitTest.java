@@ -379,6 +379,7 @@ public class MetadataResultSetsUnitTest {
         assertEquals(40, rsmd.getColumnDisplaySize(i));
         assertEquals(jdbcDecimal.getJdbcType(), rsmd.getColumnType(i));
         assertEquals("decimal", rsmd.getColumnTypeName(i));
+        assertEquals(0, rsmd.getPrecision(i));
         assertEquals(0, rsmd.getScale(i));
         assertEquals(jdbcDecimal.isCaseSensitive(), rsmd.isCaseSensitive(i));
         assertEquals(jdbcDecimal.isCurrency(), rsmd.isCurrency(i));

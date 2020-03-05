@@ -367,6 +367,8 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
             targetType = Types.DOUBLE;
         } else if (object.getClass().equals(java.lang.Float.class)) {
             targetType = Types.FLOAT;
+        } else if (object.getClass().equals(java.math.BigDecimal.class)) {
+            targetType = Types.DECIMAL;
         } else if (object.getClass().equals(java.net.Inet4Address.class)) {
             targetType = Types.OTHER;
         } else if (object.getClass().equals(java.lang.Integer.class)) {

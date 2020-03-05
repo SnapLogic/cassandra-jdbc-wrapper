@@ -15,6 +15,7 @@
 
 package com.github.adejanovski.cassandra.jdbc;
 
+import static com.github.adejanovski.cassandra.jdbc.DataTypeEnum.DECIMAL;
 import static com.github.adejanovski.cassandra.jdbc.Utils.BAD_FETCH_DIR;
 import static com.github.adejanovski.cassandra.jdbc.Utils.BAD_FETCH_SIZE;
 import static com.github.adejanovski.cassandra.jdbc.Utils.FORWARD_ONLY;
@@ -171,6 +172,9 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     public static final int DEFAULT_TYPE = ResultSet.TYPE_FORWARD_ONLY;
     public static final int DEFAULT_CONCURRENCY = ResultSet.CONCUR_READ_ONLY;
     public static final int DEFAULT_HOLDABILITY = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+
+    public static final int MAX_COLUMN_WIDTH = 40;
+
     private Row currentRow;
 
     /**
@@ -1206,10 +1210,21 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
 
         @SuppressWarnings("rawtypes")
         public int getColumnDisplaySize(int column) throws SQLException {
+            DataType type = getDataType(column);
+            DataTypeEnum name = DataTypeEnum.fromCqlTypeName(type.getName());
+
+            // client (jooq) has special handling for BigDecimal types and
+            // will correctly handle if precision and scaling are both 0.
+            // This method uses precision to determine max column width which
+            // we don't want to use for these types ...
+            if (name == DECIMAL) {
+                return MAX_COLUMN_WIDTH;
+            }
+
             int size = getPrecision(column);
             // ASCII, TEXT, VARCHAR, etc., will have a precision of Integer.MAX_VALUE
-            if (size > 40) {
-                size = 40;
+            if (size > MAX_COLUMN_WIDTH) {
+                size = MAX_COLUMN_WIDTH;
             }
             return size;
         }
@@ -1255,12 +1270,10 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         }
 
         public int getScale(int column) throws SQLException {
-            //BEAR: maybe ok to return 0 for metadata inquiries?
-
             //DataType type = getDataType(column);
             //DataTypeEnum e = DataTypeEnum.fromCqlTypeName(type.getName());
             //if (e.jdbcType != null) {
-            //    return e.jdbcType.getScale(null);
+               //return e.jdbcType.getScale(null);
             //}
             return 0;
         }

@@ -33,7 +33,7 @@ public class JdbcDecimal extends AbstractJdbcType<BigDecimal> {
     }
 
     public int getPrecision(BigDecimal obj) {
-        return (obj == null) ? Integer.MAX_VALUE : obj.precision();
+        return (obj == null) ? 0 : obj.precision();
     }
 
     public boolean isCurrency() {
