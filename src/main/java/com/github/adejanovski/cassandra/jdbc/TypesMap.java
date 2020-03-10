@@ -66,7 +66,6 @@ public class TypesMap {
         map.put("org.apache.cassandra.db.marshal.DateType", JdbcDate.instance);
         map.put("org.apache.cassandra.db.marshal.ByteType", JdbcByte.instance);
         map.put("org.apache.cassandra.db.marshal.ShortType", JdbcShort.instance);
-        // BEAR: should cass 4.x types be registered like this?
         map.put("org.apache.cassandra.db.marshal.date", JdbcDate.instance);
         map.put("org.apache.cassandra.db.marshal.time", JdbcTime.instance);
         map.put("org.apache.cassandra.db.marshal.smallint", JdbcShort.instance);

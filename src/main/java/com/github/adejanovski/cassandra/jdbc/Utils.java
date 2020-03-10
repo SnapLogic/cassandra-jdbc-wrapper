@@ -170,7 +170,7 @@ public class Utils {
     // ISO-8601 patterns
     // @formatter:off
     protected static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    protected static final String TIMESTAMP_PARSE_FORMAT = "yyyy-MM-dd[[ ]['T']HH:mm[:ss][.SSS][XX]]";
+    protected static final String TIMESTAMP_PARSE_FORMAT = "yyyy-MM-dd['T'HH:mm[:ss[.SSS]][XX]]";
     // @formatter:on
 
     protected static final Logger logger = LoggerFactory.getLogger(Utils.class);
@@ -934,6 +934,8 @@ public class Utils {
 
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TIMESTAMP_PARSE_FORMAT);
+
+            value = value.trim().replace(" ","T");
 
             TemporalAccessor ta = formatter.parseBest(value,
                 OffsetDateTime::from, LocalDateTime::from, java.time.LocalDate::from);
