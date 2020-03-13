@@ -228,7 +228,7 @@ public class UtilsUnitTest {
     @Test
     public void testParseTimestampValidFormat() throws Exception {
 
-        // interpret date time without timezone as local time 
+        // interpret date time without timezone as local time
         String input[] = {
           "2020-01-10",
           "   2020-01-10    ",

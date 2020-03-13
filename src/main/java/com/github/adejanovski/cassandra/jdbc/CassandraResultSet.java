@@ -164,7 +164,7 @@ import com.google.common.collect.Sets;
  * <td>Arbitrary-precision integer</td>
  * </tr>
  * </table>
- * 
+ *
  */
 class CassandraResultSet extends AbstractResultSet implements CassandraResultSetExtras {
     private static final Logger logger = LoggerFactory.getLogger(CassandraResultSet.class);
@@ -464,7 +464,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     /*
      * public TypedColumn getColumn(int index) throws SQLException { checkIndex(index);
      * checkNotClosed(); return values.get(index - 1); }
-     * 
+     *
      * public TypedColumn getColumn(String name) throws SQLException { checkName(name);
      * checkNotClosed(); return values.get(indexMap.get(name).intValue()); }
      */
@@ -1213,10 +1213,11 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
             DataType type = getDataType(column);
             DataTypeEnum name = DataTypeEnum.fromCqlTypeName(type.getName());
 
-            // client (jooq) has special handling for BigDecimal types and
-            // will correctly handle if precision and scaling are both 0.
-            // This method uses precision to determine max column width which
-            // we don't want to use for these types ...
+            // jOOQ has special handling for BigDecimal types and will correctly
+            // handle them if both precision and scaling are 0. This method uses
+            // precision to determine max column width which we don't want to
+            // use for these types ...
+
             if (name == DECIMAL) {
                 return MAX_COLUMN_WIDTH;
             }

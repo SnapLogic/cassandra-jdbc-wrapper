@@ -324,7 +324,7 @@ public class MetadataResultSetsUnitTest {
         Statement stmt = con.createStatement();
 
         String createNumericTypesTable = "CREATE TABLE " + KEYSPACE1
-            + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key," 
+            + ".numerictypes(tinyintcol tinyint, smallintcol smallint, intcol int primary key,"
             + " bigintcol bigint, varintcol varint, decimalcol decimal, floatcol float, doublecol double);";
 
         stmt.execute(createNumericTypesTable);

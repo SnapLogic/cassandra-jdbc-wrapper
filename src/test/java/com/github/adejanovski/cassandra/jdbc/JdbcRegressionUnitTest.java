@@ -243,17 +243,17 @@ public class JdbcRegressionUnitTest {
     /*
      * DEACTIVATED BECAUSE ALREADY EXECUTED IN testIssue33 and often fails due to arbitrary order
      * execution of tests in Junit
-     * 
+     *
      * @Test public void testIssue38() throws Exception {
-     * 
+     *
      * // test catching exception for beforeFirst() and afterLast() Statement stmt =
      * con.createStatement();
-     * 
+     *
      * ResultSet result = stmt.executeQuery("SELECT * FROM t33;");
-     * 
+     *
      * try { result.beforeFirst(); } catch (Exception e) { System.out.println();
      * System.out.println("beforeFirst() test -> "+ e); }
-     * 
+     *
      * }
      */
     @Test
@@ -538,7 +538,7 @@ public class JdbcRegressionUnitTest {
          * timeuuid_col , varchar_col , varint_col ) values(1, 'test', TextAsBlob('test'), true,
          * 5.1, 5.123142 , 4.2134432 , '192.168.1.1', 1 , 'text' , '2015-01-01 10:10:10' , now() ,
          * now(), 'test' , 3435 );
-         * 
+         *
          */
 
         String insert = "INSERT INTO t80(bigint_col , ascii_col , blob_col , boolean_col , decimal_col , double_col , "
@@ -711,7 +711,7 @@ public class JdbcRegressionUnitTest {
          * timeuuid_col , varchar_col , varint_col ) values(1, 'test', TextAsBlob('test'), true,
          * 5.1, 5.123142 , 4.2134432 , '192.168.1.1', 1 , 'text' , '2015-01-01 10:10:10' , now() ,
          * now(), 'test' , 3435 );
-         * 
+         *
          */
 
         String insert = "INSERT INTO t102(bigint_col,not_null_int_col) values(?,?);";
@@ -745,60 +745,60 @@ public class JdbcRegressionUnitTest {
      * 2.1+ if(!System.getProperty("cassandra.version").startsWith("1") &&
      * !System.getProperty("cassandra.version").startsWith("2.0")){ System.out.println();
      * System.out.println("Test UDT and Tuple"); System.out.println("--------------");
-     * 
+     *
      * Statement stmt = con.createStatement(); //java.util.Date now = new java.util.Date();
-     * 
-     * 
+     *
+     *
      * // Create the target Column family with each basic data type available on Cassandra
-     * 
+     *
      * String createUDT = "CREATE TYPE IF NOT EXISTS fieldmap (key text, value text )"; String
      * createCF =
      * "CREATE COLUMNFAMILY t_udt (id bigint PRIMARY KEY, field_values frozen<fieldmap>, the_tuple frozen<tuple<int, text, float>>, the_other_tuple frozen<tuple<int, text, float>>);"
      * ; stmt.execute(createUDT); stmt.execute(createCF); stmt.close();
-     * 
+     *
      * System.out.println("con.getMetaData().getDatabaseProductName() = " +
      * con.getMetaData().getDatabaseProductName());
      * System.out.println("con.getMetaData().getDatabaseProductVersion() = " +
      * con.getMetaData().getDatabaseProductVersion());
      * System.out.println("con.getMetaData().getDriverName() = " +
      * con.getMetaData().getDriverName()); Statement statement = con.createStatement();
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * String insert =
      * "INSERT INTO t_udt(id, field_values, the_tuple, the_other_tuple) values(?,{key : ?, value : ?}, (?,?,?),?);"
      * ;
-     * 
-     * 
+     *
+     *
      * TupleValue t = TupleType.of(ProtocolVersion.V4,
      * con.cluster.getConfiguration().getCodecRegistry(), DataType.cint(), DataType.text(),
      * DataType.cfloat()).newValue(); t.setInt(0, 1).setString(1, "midVal").setFloat(2, (float)2.0);
-     * 
+     *
      * PreparedStatement pstatement = con.prepareStatement(insert);
-     * 
-     * 
+     *
+     *
      * pstatement.setObject(1, 1L); // bigint
-     * 
+     *
      * pstatement.setString(2, "key1"); pstatement.setString(3, "value1"); pstatement.setInt(4, 1);
      * pstatement.setString(5, "midVal"); pstatement.setFloat(6, (float) 2.0);
      * pstatement.setObject(7, (Object)t);
-     * 
-     * 
+     *
+     *
      * pstatement.execute();
-     * 
+     *
      * ResultSet result = statement.executeQuery("SELECT * FROM t_udt;");
-     * 
+     *
      * assert(result.next()==true); Assert.assertEquals(1L, result.getLong("id")); UDTValue udtVal =
      * (UDTValue) result.getObject("field_values"); Assert.assertEquals(udtVal.getString("key"),
      * "key1"); Assert.assertEquals(udtVal.getString("value"), "value1");
-     * 
+     *
      * TupleValue tupleVal = (TupleValue) result.getObject("the_tuple");
      * Assert.assertEquals(tupleVal.getInt(0), 1); Assert.assertEquals(tupleVal.getString(1),
      * "midVal"); Assert.assertEquals(tupleVal.getFloat(2), (float) 2.0);
-     * 
-     * 
+     *
+     *
      * statement.close(); pstatement.close(); }
-     * 
+     *
      * }
      */
 

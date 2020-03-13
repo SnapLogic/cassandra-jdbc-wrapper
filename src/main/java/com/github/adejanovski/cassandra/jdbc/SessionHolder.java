@@ -197,7 +197,13 @@ class SessionHolder {
             }
         }
 
-        // we don't currently need codecs but leaving this code in place
+        // The codecs below were defined in the original code. We probably 
+        // don't need all of them, however, a couple are necessary to run the
+        // tests, specifically these:
+        //
+        // NumericTypesUnitTest.testDecimalType [bigint <-> java.lang.Integer]
+        // JdbcRegressionUnitTest.testTimestampToLongCodec [timestamp <-> java.lang.Long]
+
         // Declare and register codecs
         List<TypeCodec<?>> codecs = new ArrayList<TypeCodec<?>>();
         CodecRegistry customizedRegistry = new CodecRegistry();
@@ -210,7 +216,6 @@ class SessionHolder {
         codecs.add(new DoubleToFloatCodec(Double.class));
 
         customizedRegistry.register(codecs);
-
         builder.withCodecRegistry(customizedRegistry);
         // end of codec register
 
