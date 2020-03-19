@@ -235,7 +235,7 @@ public class MetadataResultSets {
                                         .addEntry("TYPE_NAME", column.getType().toString())
                                         .addEntry("COLUMN_SIZE", length + "")
                                         .addEntry("BUFFER_LENGTH", "0")
-                                        .addEntry("DECIMAL_DIGITS", null)
+                                        .addEntry("DECIMAL_DIGITS", "0")
                                         .addEntry("NUM_PREC_RADIX", npr + "")
                                         .addEntry("NULLABLE", DatabaseMetaData.columnNoNulls + "")
                                         .addEntry("REMARKS", column.toString())
