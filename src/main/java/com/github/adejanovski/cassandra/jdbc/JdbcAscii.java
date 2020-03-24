@@ -14,11 +14,9 @@
  */
 package com.github.adejanovski.cassandra.jdbc;
 
-//import java.nio.charset.Charset;
 import java.sql.Types;
 
 public class JdbcAscii extends AbstractJdbcType<String> {
-    //private static final Charset US_ASCII = Charset.forName("US-ASCII");
     public static final JdbcAscii instance = new JdbcAscii();
 
     JdbcAscii() {

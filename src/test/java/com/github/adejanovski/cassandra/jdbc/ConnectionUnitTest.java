@@ -46,8 +46,6 @@ public class ConnectionUnitTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        /* System.setProperty("cassandra.version", "2.1.2"); */
-
         if (BuildCluster.HOST.equals(System.getProperty("host", ConnectionDetails.getHost()))) {
             BuildCluster.setUpBeforeSuite();
             suiteLaunch = false;

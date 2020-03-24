@@ -188,16 +188,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     // the current row key when iterating through results.
     private byte[] curRowKey = null;
 
-    /**
-     * The values.
-     */
-    // private List<Object> values = new ArrayList<Object>();
-
-    /**
-     * The index map.
-     */
-    // private Map<String, Integer> indexMap = new HashMap<String, Integer>();
-
     private final CResultSetMetaData meta;
 
     private final CassandraStatement statement;
@@ -211,9 +201,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     private boolean wasNull;
 
     private com.datastax.driver.core.ResultSet driverResultSet;
-    // private ArrayList<com.datastax.driver.core.ResultSet> severalDriverResultSet;
-
-    // private CqlMetadata schema;
 
     /**
      * no argument constructor.
@@ -235,15 +222,11 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         this.driverResultSet = resultSet;
         this.rowsIterators = Lists.newArrayList();
         this.currentIteratorIndex = 0;
-        // this.schema = resultSet.schema;
 
         // Initialize meta-data from schema
         populateMetaData();
 
-        // rowsIterators.add(resultSet.iterator());
         rowsIterator = resultSet.iterator();
-
-        // colDefinitions = resultSet.getColumnDefinitions();
 
         if (hasMoreRows()) {
             populateColumns();
@@ -261,13 +244,9 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         this.resultSetType = statement.getResultSetType();
         this.fetchDirection = statement.getFetchDirection();
         this.fetchSize = statement.getFetchSize();
-        // this.rowsIterators = Lists.newArrayList();
 
         // We have several result sets, but we will use only the first one for metadata needs
         this.driverResultSet = resultSets.get(0);
-
-        // Now we concatenate iterators of the different result sets into a single one and voilà !!
-        // ;)
 
         currentIteratorIndex = 0;
 
@@ -283,13 +262,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
                                                                                          // are too
                                                                                          // many
                                                                                          // resultSets
-            /*
-             * if(resultSets.get(i).iterator().hasNext()){
-             * rowsIterators.add(resultSets.get(i).iterator()); }
-             */
         }
-
-        // colDefinitions = driverResultSet.getColumnDefinitions();
 
         // Initialize to column values from the first row
         if (hasMoreRows()) {
@@ -310,13 +283,7 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     }
 
     private final void populateColumns() {
-        // if(rowsIterator.hasNext()){
         currentRow = rowsIterator.next();
-        // }
-        /*
-         * else if(hasNextIterator()){ nextIterator(); currentRow = rowsIterator.next(); }
-         */
-
     }
 
     public boolean absolute(int arg0) throws SQLException {
@@ -356,8 +323,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     }
 
     private final void checkName(String name) throws SQLException {
-        // if (indexMap.get(name) == null) throw new
-        // SQLSyntaxErrorException(String.format(VALID_LABELS, name));
         if (currentRow != null) {
             wasNull = currentRow.isNull(name);
             if (!currentRow.getColumnDefinitions().contains(name))
@@ -383,9 +348,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     }
 
     public void close() throws SQLException {
-        /*
-         * indexMap = null; values = null;
-         */
         if (!isClosed()) {
             this.statement.close();
         }
@@ -461,13 +423,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         return currentRow.getBytes(name).array();
     }
 
-    /*
-     * public TypedColumn getColumn(int index) throws SQLException { checkIndex(index);
-     * checkNotClosed(); return values.get(index - 1); }
-     *
-     * public TypedColumn getColumn(String name) throws SQLException { checkName(name);
-     * checkNotClosed(); return values.get(indexMap.get(name).intValue()); }
-     */
     public int getConcurrency() throws SQLException {
         checkNotClosed();
         return statement.getResultSetConcurrency();
@@ -1013,8 +968,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         checkIndex(index);
         calendar.setTime(currentRow.getTimestamp(index - 1));
         return new Timestamp(calendar.toInstant().toEpochMilli());
-        // silently ignore the Calendar argument; its a hint we do not need
-        //return getTimestamp(index);
     }
 
     public Timestamp getTimestamp(String name) throws SQLException {
@@ -1027,8 +980,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         checkName(name);
         calendar.setTime(currentRow.getTimestamp(name));
         return new Timestamp(calendar.toInstant().toEpochMilli());
-        // silently ignore the Calendar argument; its a hint we do not need
-        // return getTimestamp(name);
     }
 
     public int getType() throws SQLException {
@@ -1098,8 +1049,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
             // populateColumns is called upon init to set up the metadata fields; so skip first call
             if (rowNumber != 0)
                 populateColumns();
-            // else rowsIterator.next();
-            // populateColumns();
             rowNumber++;
             return true;
         }
@@ -1181,7 +1130,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
          * return the Cassandra Cluster Name as the Catalog
          */
         public String getCatalogName(int column) throws SQLException {
-            // checkIndex(column);
             return statement.connection.getCatalog();
         }
 
@@ -1231,13 +1179,10 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         }
 
         public String getColumnLabel(int column) throws SQLException {
-            // checkIndex(column);
             return getColumnName(column);
         }
 
         public String getColumnName(int column) throws SQLException {
-            // checkIndex(column);
-
             if (currentRow != null) {
                 return currentRow.getColumnDefinitions().getName(column - 1);
             }
@@ -1264,18 +1209,11 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
             if (name != null) {
                 return name.getPrecision();
             }
-            // String stringValue = getObject(column).toString();
-            // return (stringValue == null ? -1 : stringValue.length());
 
             return 0;
         }
 
         public int getScale(int column) throws SQLException {
-            //DataType type = getDataType(column);
-            //DataTypeEnum e = DataTypeEnum.fromCqlTypeName(type.getName());
-            //if (e.jdbcType != null) {
-               //return e.jdbcType.getScale(null);
-            //}
             return 0;
         }
 
@@ -1283,14 +1221,8 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
          * return the DEFAULT current Keyspace as the Schema Name
          */
         public String getSchemaName(int column) throws SQLException {
-            // checkIndex(column);
             return statement.connection.getSchema();
         }
-
-        /*
-         * public String getTableName(int column) throws SQLException { throw new
-         * SQLFeatureNotSupportedException(); }
-         */
 
         public boolean isAutoIncrement(int column) throws SQLException {
              return false;
@@ -1325,17 +1257,14 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
          * absence is the equivalent of null in Cassandra
          */
         public int isNullable(int column) throws SQLException {
-            // checkIndex(column);
             return ResultSetMetaData.columnNullable;
         }
 
         public boolean isReadOnly(int column) throws SQLException {
-            // checkIndex(column);
             return column == 0;
         }
 
         public boolean isSearchable(int column) throws SQLException {
-            // checkIndex(column);
             return false;
         }
 
@@ -1354,7 +1283,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         }
 
         public boolean isWritable(int column) throws SQLException {
-            // checkIndex(column);
             return column > 0;
         }
 

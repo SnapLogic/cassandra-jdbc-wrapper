@@ -73,8 +73,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
 
     private BoundStatement statement;
     private ArrayList<BoundStatement> batchStatements;
-    // private BoundStatement boundStatement;
-    // private CassandraResultSet currentResultSet=null;
     protected ResultSet currentResultSet = null;
 
     CassandraPreparedStatement(CassandraConnection con, String cql) throws SQLException {
@@ -113,26 +111,12 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
                     String.format("the column index must be a positive number : %d", index));
     }
 
-    /*
-     * private List<ByteBuffer> getBindValues() throws SQLException { this.statement.b
-     * List<ByteBuffer> values = new ArrayList<ByteBuffer>(); if (bindValues.size() != count) throw
-     * new SQLRecoverableException( String.
-     * format("the number of bound variables: %d must match the count of bound variable markers in the CQL: %d"
-     * , bindValues.size(), count));
-     * 
-     * for (int i = 1; i <= count; i++) { ByteBuffer value = bindValues.get(i); if (value == null)
-     * throw new SQLRecoverableException(String.format("the bound value for index: %d was not set",
-     * i)); values.add(value); } return values; }
-     */
-
     public void close() {
         try {
             connection.removeStatement(this);
         } catch (Exception e) {
 
         }
-
-        // connection = null;
     }
 
     private void doExecute() throws SQLException {
@@ -246,21 +230,17 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
         checkNotClosed();
         checkIndex(parameterIndex);
         this.statement.setDecimal(parameterIndex - 1, decimal);
-        // bindValues.put(parameterIndex, decimal == null ? null :
-        // JdbcDecimal.instance.decompose(decimal));
     }
 
     public void setBoolean(int parameterIndex, boolean truth) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcBoolean.instance.decompose(truth));
         this.statement.setBool(parameterIndex - 1, truth);
     }
 
     public void setByte(int parameterIndex, byte b) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcByte.instance.decompose(b));
         this.statement.setByte(parameterIndex, b);
     }
 
@@ -268,7 +248,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
         checkNotClosed();
         checkIndex(parameterIndex);
         this.statement.setBytes(parameterIndex - 1, ByteBuffer.wrap(bytes));
-        // bindValues.put(parameterIndex, bytes == null ? null : ByteBuffer.wrap(bytes));
     }
 
     public void setDate(int parameterIndex, Date value) throws SQLException {
@@ -280,7 +259,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
             this.statement.setToNull(parameterIndex - 1);
         } else {
             LocalDate date = LocalDate.fromMillisSinceEpoch(value.getTime());
-            // bindValues.put(parameterIndex, (value == null) ? null : JdbcDate.instance.decompose(value));
             this.statement.setDate(parameterIndex - 1, date);
         }
     }
@@ -293,7 +271,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
     public void setDouble(int parameterIndex, double decimal) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcDouble.instance.decompose(decimal));
         this.statement.setDouble(parameterIndex - 1, decimal);
     }
 
@@ -301,13 +278,11 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
         checkNotClosed();
         checkIndex(parameterIndex);
         this.statement.setToNull(parameterIndex-1);
-        // this.statement.setDuration(parameterIndex-1, null);
     }
 
     public void setFloat(int parameterIndex, float decimal) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcFloat.instance.decompose(decimal));
         this.statement.setFloat(parameterIndex - 1, decimal);
     }
 
@@ -315,7 +290,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
     public void setInt(int parameterIndex, int integer) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcInt32.instance.decompose(integer));
         try {
             this.statement.setInt(parameterIndex - 1, integer);
         } catch (CodecNotFoundException e) {
@@ -329,7 +303,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
     public void setLong(int parameterIndex, long bigint) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcLong.instance.decompose(bigint));
         this.statement.setLong(parameterIndex - 1, bigint);
     }
 
@@ -508,7 +481,6 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
     public void setShort(int parameterIndex, short smallint) throws SQLException {
         checkNotClosed();
         checkIndex(parameterIndex);
-        // bindValues.put(parameterIndex, JdbcShort.instance.decompose(smallint));
         this.statement.setInt(parameterIndex - 1, smallint);
     }
 
@@ -544,11 +516,9 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
         checkIndex(parameterIndex);
         // time type data is handled as an 8 byte Long value of milliseconds since the epoch
         if (value == null) {
-            // bindValues.put(parameterIndex, null);
             this.statement.setToNull(parameterIndex - 1);
         } else {
             Long millis = (Long) JdbcLong.instance.decompose(Long.valueOf(value.getTime()));
-            // bindValues.put(parameterIndex, millis);
             this.statement.setTime(parameterIndex - 1, millis);
         }
     }
