@@ -78,6 +78,6 @@ public class JdbcBoolean extends AbstractJdbcType<Boolean> {
     }
 
     public Object decompose(Boolean value) {
-        return (value == null) ? null : (Object) value;
+        return value;
     }
 }
