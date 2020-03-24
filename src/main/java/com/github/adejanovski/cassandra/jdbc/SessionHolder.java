@@ -197,7 +197,7 @@ class SessionHolder {
             }
         }
 
-        // The codecs below were defined in the original code. We probably 
+        // The codecs below were defined in the original code. We probably
         // don't need all of them, however, a couple are necessary to run the
         // tests, specifically these:
         //

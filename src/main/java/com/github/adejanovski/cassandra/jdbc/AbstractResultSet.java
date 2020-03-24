@@ -62,7 +62,7 @@ abstract class AbstractResultSet {
     /*
      * public Blob getBlob(int arg0) throws SQLException { throw new
      * SQLFeatureNotSupportedException(NOT_SUPPORTED); }
-     * 
+     *
      * public Blob getBlob(String arg0) throws SQLException { throw new
      * SQLFeatureNotSupportedException(NOT_SUPPORTED); }
      */

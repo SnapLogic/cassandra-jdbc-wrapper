@@ -125,7 +125,7 @@ public class CassandraConnection extends AbstractConnection implements Connectio
 
     /**
      * Instantiates a new CassandraConnection.
-     * 
+     *
      * @param sessionHolder
      * @throws SQLException
      */
@@ -301,7 +301,7 @@ public class CassandraConnection extends AbstractConnection implements Connectio
         // set timeout
         /*
          * try { if (isClosed()) { return false; }
-         * 
+         *
          * if (isAlive == null) { isAlive = prepareStatement(currentCqlVersion == "2.0.0" ?
          * IS_VALID_CQLQUERY_2_0_0 : IS_VALID_CQLQUERY_3_0_0); } // the result is not important
          * isAlive.executeQuery().close(); } catch (SQLException e) { return false; } finally { //
@@ -406,7 +406,7 @@ public class CassandraConnection extends AbstractConnection implements Connectio
 
     /**
      * Remove a Statement from the Open Statements List
-     * 
+     *
      * @param statement
      * @return
      */

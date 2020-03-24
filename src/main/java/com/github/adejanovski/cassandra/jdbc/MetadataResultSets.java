@@ -38,10 +38,10 @@ public class MetadataResultSets {
 
     /**
      * Make a {@code Column} from a column name and a value.
-     * 
+     *
      * @param name the name of the column
      * @param value the value of the column as a {@code ByteBufffer}
-     * 
+     *
      * @return {@code Column}
      */
     @SuppressWarnings("unused")

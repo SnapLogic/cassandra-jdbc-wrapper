@@ -234,7 +234,7 @@ public class MetadataResultSetsUnitTest {
         System.out.println();
 
         // verify DECIMAL_DIGITS column data doesn't return null which bubbles
-        // up as a NumberFormatException. This column data is queried by 
+        // up as a NumberFormatException. This column data is queried by
         // the Snap jdbc code.
         assertEquals(0, result.getInt("DECIMAL_DIGITS"));
     }
