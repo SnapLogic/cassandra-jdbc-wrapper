@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -371,7 +372,8 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     /** @deprecated */
     public BigDecimal getBigDecimal(int index, int scale) throws SQLException {
         checkIndex(index);
-        return currentRow.getDecimal(index - 1).setScale(scale);
+        BigDecimal bd = currentRow.getDecimal(index - 1);
+        return (bd == null) ? null : bd.setScale(scale);
     }
 
     public BigDecimal getBigDecimal(String name) throws SQLException {
@@ -382,7 +384,8 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     /** @deprecated */
     public BigDecimal getBigDecimal(String name, int scale) throws SQLException {
         checkName(name);
-        return currentRow.getDecimal(name).setScale(scale);
+        BigDecimal bd = currentRow.getDecimal(name);
+        return (bd == null) ? null : bd.setScale(scale);
     }
 
     public BigInteger getBigInteger(int index) throws SQLException {
@@ -416,11 +419,13 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
     }
 
     public byte[] getBytes(int index) throws SQLException {
-        return currentRow.getBytes(index - 1).array();
+        ByteBuffer bb = currentRow.getBytes(index - 1);
+        return (bb == null) ? null : bb.array();
     }
 
     public byte[] getBytes(String name) throws SQLException {
-        return currentRow.getBytes(name).array();
+        ByteBuffer bb = currentRow.getBytes(name);
+        return (bb == null) ? null : bb.array();
     }
 
     public int getConcurrency() throws SQLException {
@@ -513,7 +518,6 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
 
     public int getInt(String name) throws SQLException {
         checkName(name);
-
         return currentRow.getInt(name);
     }
 
@@ -562,7 +566,8 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
                 return (long) currentRow.getInt(index - 1);
             } else if (currentRow.getColumnDefinitions().getType(index - 1).getName().toString()
                     .equals("varint")) {
-                return currentRow.getVarint(index - 1).longValue();
+                BigInteger bi = currentRow.getVarint(index - 1);
+                return (bi == null) ? null : bi.longValue();
             } else {
                 return currentRow.getLong(index - 1);
             }
@@ -581,7 +586,8 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
                 return (long) currentRow.getInt(name);
             } else if (currentRow.getColumnDefinitions().getType(name).getName().toString()
                     .equals("varint")) {
-                return currentRow.getVarint(name).longValue();
+                BigInteger bi = currentRow.getVarint(name);
+                return (bi == null) ? null : bi.longValue();
             } else {
                 return currentRow.getLong(name);
             }
