@@ -1111,6 +1111,67 @@ public class JdbcRegressionUnitTest {
         pstatement.close();
     }
 
+    @Test
+    public void testSnap6249() throws Exception {
+        System.out.println();
+        System.out.println("Test Issue SNAP-6249");
+        System.out.println("--------------------");
+
+        Statement stmt = con.createStatement();
+
+        String createCF = "CREATE COLUMNFAMILY tblPosition (" +
+            " account_id text," +           // 1
+            " security_id text," +          // 2
+            " counter bigint," +            // 3
+            " avg_exec_price double," +     // 4
+            " pending_quantity double," +   // 5
+            " quantity double," +           // 6
+            " transaction_id uuid," +       // 7
+            " update_time timestamp," +     // 8
+            " PRIMARY KEY (account_id, security_id, counter)" +
+            ") WITH CLUSTERING ORDER BY (security_id ASC, counter DESC);";
+
+        stmt.execute(createCF);
+        stmt.close();
+        con.close();
+
+        // open it up again to see the new CF
+        con = DriverManager.getConnection(String.format(
+                "jdbc:cassandra://%s:%d/%s?loadbalancing=TokenAwarePolicy(RoundRobinPolicy())",
+                HOST, PORT, KEYSPACE));
+
+        stmt = con.createStatement();
+
+        String insert = "INSERT INTO tblPosition " +
+            "(account_id, security_id, counter, avg_exec_price, pending_quantity, quantity, transaction_id, update_time) " +
+            "VALUES ('user_1', 'AMZN', 1, 1239.2, 0, 1010, null, '2018-01-25 17:18:08');";
+        stmt.execute(insert);
+
+        ResultSet result = stmt.executeQuery(
+            "SELECT * FROM tblPosition WHERE account_id = 'user_1' group by security_id;");
+
+        AssertJUnit.assertTrue(result.next());
+        AssertJUnit.assertEquals("user_1", result.getString("account_id"));
+        AssertJUnit.assertEquals("AMZN", result.getString("security_id"));
+        AssertJUnit.assertEquals(1L, result.getLong("counter"));
+        AssertJUnit.assertEquals(1239.2d, result.getDouble("avg_exec_price"));
+        AssertJUnit.assertEquals(0d, result.getDouble("pending_quantity"));
+        AssertJUnit.assertEquals(1010.0d, result.getDouble("quantity"));
+        AssertJUnit.assertNull(result.getString(7)); // transaction_id
+
+        String insert2 = "INSERT INTO tblPosition " +
+            "(account_id, security_id, counter, avg_exec_price, pending_quantity, quantity, transaction_id, update_time) " +
+            "VALUES ('user_2', 'AMZN', 1, 1239.2, 0, 1010, uuid(), '2018-01-25 17:18:08');";
+        stmt.execute(insert2);
+
+        result = stmt.executeQuery("SELECT * FROM tblPosition WHERE account_id = 'user_2';");
+
+        AssertJUnit.assertTrue(result.next());
+        AssertJUnit.assertNotNull(result.getString(7)); // transaction_id
+
+        stmt.close();
+    }
+
     private final String showColumn(int index, ResultSet result) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("[").append(index).append("]");

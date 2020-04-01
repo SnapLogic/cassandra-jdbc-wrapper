@@ -908,11 +908,13 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         checkIndex(index);
         try {
             if (currentRow.getColumnDefinitions().getType(index - 1).isCollection()) {
-                return getObject(index).toString();
+                Object object = getObject(index);
+                return (object == null) ? null : String.valueOf(object);
             }
             return currentRow.getString(index - 1);
         } catch (Exception e) {
-            return getObject(index).toString();
+            Object object = getObject(index);
+            return (object == null) ? null : String.valueOf(object);
         }
     }
 
@@ -920,11 +922,13 @@ class CassandraResultSet extends AbstractResultSet implements CassandraResultSet
         checkName(name);
         try {
             if (currentRow.getColumnDefinitions().getType(name).isCollection()) {
-                return getObject(name).toString();
+                Object object = getObject(name);
+                return (object == null) ? null : String.valueOf(object);
             }
             return currentRow.getString(name);
         } catch (Exception e) {
-            return getObject(name).toString();
+            Object object = getObject(name);
+            return (object == null) ? null : String.valueOf(object);
         }
     }
 

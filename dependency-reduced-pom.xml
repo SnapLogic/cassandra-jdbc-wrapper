@@ -437,6 +437,13 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <repository>
+      <id>Snaplogic-ThirdPartyMaven-Repository</id>
+      <name>Snaplogic ThirdParty Repository</name>
+      <url>http://maven.clouddev.snaplogic.com:8080/nexus/content/repositories/thirdparty</url>
+    </repository>
+  </distributionManagement>
   <properties>
     <sourceReleaseAssemblyDescriptor>source-release</sourceReleaseAssemblyDescriptor>
     <cassandra.host>localhost</cassandra.host>
