@@ -74,7 +74,9 @@ public class BuildCluster {
             session = cluster.connect();
             return true;
         } catch (Exception e) {
-            if (LOG.isDebugEnabled()) LOG.debug("problem building cluster", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("problem building cluster", e);
+            }
             return false;
         }
 

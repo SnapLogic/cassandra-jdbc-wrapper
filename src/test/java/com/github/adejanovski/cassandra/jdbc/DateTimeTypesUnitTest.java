@@ -73,9 +73,9 @@ public class DateTimeTypesUnitTest {
 
         con = DriverManager.getConnection(URL);
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("URL         = '{}'", URL);
-
+        }
         Statement stmt = con.createStatement();
 
         String useKS = String.format("USE %s;", KEYSPACE);
@@ -92,9 +92,9 @@ public class DateTimeTypesUnitTest {
             "CREATE KEYSPACE %s WITH replication = { 'class' : 'SimpleStrategy',  'replication_factor' : 1  };",
             KEYSPACE);
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("createKS    = '{}'", createKS);
-
+        }
         stmt = con.createStatement();
         stmt.execute("USE " + SYSTEM);
         stmt.execute(createKS);
@@ -103,9 +103,9 @@ public class DateTimeTypesUnitTest {
         String createDateTimeTypesTable = "CREATE TABLE " + KEYSPACE
             + ".datetimetypes(intcol int primary key, datecol date, timecol time, timestampcol timestamp);";
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("createTable = '{}'", createDateTimeTypesTable);
-
+        }
         stmt.execute(createDateTimeTypesTable);
         stmt.close();
         con.close();
@@ -113,11 +113,11 @@ public class DateTimeTypesUnitTest {
         // open it up again to see the new TABLE
         URL = String.format("jdbc:cassandra://%s:%d/%s?version=%s", HOST, PORT, KEYSPACE, CQLV3);
         con = DriverManager.getConnection(URL);
-        if (LOG.isDebugEnabled())
-            LOG.debug("URL         = '{}'", URL);
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("URL         = '{}'", URL);
             LOG.debug("Unit Test: 'DateTimeTypesUnitTest' initialization complete.\n\n");
+        }
     }
 
     @AfterClass
@@ -162,7 +162,9 @@ public class DateTimeTypesUnitTest {
         for (int i=1; i <= durations.length; ++i) {
             Duration d = Duration.parse(durations[i-1]);
 
-            if (LOG.isDebugEnabled()) LOG.debug(format("[%s]", formatDuration(d)));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(format("[%s]", formatDuration(d)));
+            }
 
             String insert = format("INSERT INTO datetimetypes (intcol, timecol) VALUES (%d, '%s');",
                 i, formatDuration(d));
@@ -201,7 +203,9 @@ public class DateTimeTypesUnitTest {
         for (int i=1; i <= timestamps.length; ++i) {
             String timestamp = timestamps[i-1];
 
-            if (LOG.isDebugEnabled()) LOG.debug(format("[%s]", timestamp));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(format("[%s]", timestamp));
+            }
 
             String insert = format(
                 "INSERT INTO datetimetypes (intcol, timestampcol) VALUES (%d, '%s');",

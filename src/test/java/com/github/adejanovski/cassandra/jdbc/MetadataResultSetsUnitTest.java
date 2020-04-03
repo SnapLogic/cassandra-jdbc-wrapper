@@ -165,7 +165,9 @@ public class MetadataResultSetsUnitTest {
         CassandraStatement statement = (CassandraStatement) con.createStatement();
         ResultSet result = MetadataResultSets.instance.makeTableTypes(statement);
 
-        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(toString(result));
+        }
     }
 
     @Test
@@ -173,7 +175,9 @@ public class MetadataResultSetsUnitTest {
         CassandraStatement statement = (CassandraStatement) con.createStatement();
         ResultSet result = MetadataResultSets.instance.makeCatalogs(statement);
 
-        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(toString(result));
+        }
     }
 
     @Test
@@ -187,7 +191,9 @@ public class MetadataResultSetsUnitTest {
         }
 
         result = MetadataResultSets.instance.makeSchemas(statement, KEYSPACE2);
-        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(toString(result));
+        }
     }
 
     @Test
@@ -201,13 +207,19 @@ public class MetadataResultSetsUnitTest {
         }
 
         result = MetadataResultSets.instance.makeTables(statement, KEYSPACE2, null);
-        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(toString(result));
+        }
 
         result = MetadataResultSets.instance.makeTables(statement, null, "test1");
-        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(toString(result));
+        }
 
         result = MetadataResultSets.instance.makeTables(statement, KEYSPACE2, "test1");
-        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(toString(result));
+        }
     }
 
     @Test
