@@ -31,12 +31,12 @@ import org.testng.annotations.Test;
 
 public class BatchStatementsUnitTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CollectionsUnitTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BatchStatementsUnitTest.class);
 
     public static String HOST = System.getProperty("host", ConnectionDetails.getHost());
     private static final int PORT = Integer
             .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
-    private static final String KEYSPACE = "testks";
+    private static final String KEYSPACE = "testks1";
     private static final String SYSTEM = "system";
     private static final String CQLV3 = "3.0.0";
 
@@ -62,8 +62,7 @@ public class BatchStatementsUnitTest {
 
         con = DriverManager.getConnection(URL);
 
-        if (LOG.isDebugEnabled())
-            LOG.debug("URL         = '{}'", URL);
+        LOG.debug("URL = '{}'", URL);
 
         Statement stmt = con.createStatement();
 
@@ -71,12 +70,13 @@ public class BatchStatementsUnitTest {
         String useKS = String.format("USE %s;", KEYSPACE);
 
         // Drop Keyspace
-        String dropKS = String.format("DROP KEYSPACE %s;", KEYSPACE);
+        String dropKS = String.format("DROP KEYSPACE \"%s\";", KEYSPACE);
 
         try {
             stmt.execute(dropKS);
         } catch (Exception e) {
-            /* Exception on DROP is OK */}
+            /* Exception on DROP is OK */
+        }
 
         // Create KeySpace
         String createKS = String.format(
@@ -84,8 +84,7 @@ public class BatchStatementsUnitTest {
                 KEYSPACE);
         // String createKS = String.format("CREATE KEYSPACE %s WITH strategy_class = SimpleStrategy
         // AND strategy_options:replication_factor = 1;",KEYSPACE);
-        if (LOG.isDebugEnabled())
-            LOG.debug("createKS    = '{}'", createKS);
+        LOG.debug("createKS = '{}'", createKS);
 
         stmt = con.createStatement();
         stmt.execute("USE " + SYSTEM);
@@ -95,8 +94,8 @@ public class BatchStatementsUnitTest {
         // Create the target Table (CF)
         String createTable = "CREATE TABLE testcollection (" + " k int PRIMARY KEY,"
                 + " L list<bigint>," + " M map<double, boolean>," + " S set<text>" + ") ;";
-        if (LOG.isDebugEnabled())
-            LOG.debug("createTable = '{}'", createTable);
+
+        LOG.debug("createTable = '{}'", createTable);
 
         stmt.execute(createTable);
         stmt.close();
@@ -135,7 +134,6 @@ public class BatchStatementsUnitTest {
 
     @Test
     public void testBatchSimpleStatement() throws Exception {
-        System.out.println("Test: 'testBatchSimpleStatement'\n");
 
         Statement stmt = con.createStatement();
         stmt.execute("truncate testcollection");
@@ -143,8 +141,6 @@ public class BatchStatementsUnitTest {
         int nbRows = CassandraStatement.MAX_ASYNC_QUERIES;
 
         for (int i = 0; i < nbRows; i++) {
-            // System.out.println("--- Statement " + i + " ==> INSERT INTO testcollection (k,L)
-            // VALUES( " + i + ",[1, 3, 12345])");
             statement.addBatch("INSERT INTO testcollection (k,L) VALUES( " + i + ",[1, 3, 12345])");
         }
 
@@ -179,7 +175,6 @@ public class BatchStatementsUnitTest {
 
     @Test
     public void testBatchSimpleSplitStatement() throws Exception {
-        System.out.println("Test: 'testBatchSimpleSplitStatement'\n");
 
         Statement stmt = con.createStatement();
         stmt.execute("truncate testcollection");
@@ -189,8 +184,6 @@ public class BatchStatementsUnitTest {
         StringBuilder queryBuilder = new StringBuilder();
 
         for (int i = 0; i < nbRows; i++) {
-            // System.out.println("--- Statement " + i + " ==> INSERT INTO testcollection (k,L)
-            // VALUES( " + i + ",[1, 3, 12345])");
             queryBuilder
                     .append("INSERT INTO testcollection (k,L) VALUES( " + i + ",[1, 3, 12345]);");
         }
@@ -224,7 +217,6 @@ public class BatchStatementsUnitTest {
 
     @Test
     public void testBatchPreparedStatement() throws Exception {
-        System.out.println("Test: 'testBatchPreparedStatement'\n");
 
         Statement stmt = con.createStatement();
         stmt.execute("truncate testcollection");
@@ -233,7 +225,6 @@ public class BatchStatementsUnitTest {
         int nbRows = CassandraStatement.MAX_ASYNC_QUERIES;
 
         for (int i = 0; i < nbRows; i++) {
-            // System.out.println("--- Generating prepared statement " + i);
             statement.setInt(1, i);
             statement.setString(2, "[1, 3, 12345]");
             statement.addBatch();
@@ -270,7 +261,6 @@ public class BatchStatementsUnitTest {
 
     @Test
     public void testUnsetParameterPreparedStatement() throws Exception {
-        System.out.println("Test: 'testUnsetParameterPreparedStatement'\n");
 
         Statement stmt = con.createStatement();
         stmt.execute("truncate testcollection");
@@ -279,7 +269,6 @@ public class BatchStatementsUnitTest {
         int nbRows = CassandraStatement.MAX_ASYNC_QUERIES;
 
         for (int i = 0; i < nbRows; i++) {
-            // System.out.println("--- Generating prepared statement " + i);
             statement.setInt(1, i);
             statement.setString(2, "[1, 3, 12345]");
             statement.addBatch();
@@ -292,7 +281,6 @@ public class BatchStatementsUnitTest {
 
     @Test
     public void testAsyncSelectStatement() throws Exception {
-        System.out.println("Test: 'testAsyncSelectStatement'\n");
 
         PreparedStatement statement = con2
                 .prepareStatement("INSERT INTO testcollection (k,L) VALUES(?,?)");
@@ -336,13 +324,11 @@ public class BatchStatementsUnitTest {
 
     @Test
     public void testAsyncSelect1Statement() throws Exception {
-        System.out.println("Test: 'testAsyncSelect1Statement'\n");
 
         PreparedStatement statement = con
                 .prepareStatement("INSERT INTO testcollection (k,L) VALUES(?,?)");
 
         for (int i = 0; i < 1; i++) {
-            System.out.println("--- Generating prepared statement " + i);
             statement.setInt(1, i);
             statement.setString(2, "[1, 3, 12345]");
             statement.addBatch();
@@ -381,7 +367,6 @@ public class BatchStatementsUnitTest {
 
     @Test(expectedExceptions = SQLTransientException.class)
     public void testBatchFailSimpleSplitStatement() throws Exception {
-        System.out.println("Test: 'testBatchFailSimpleSplitStatement'\n");
 
         Statement stmt = con.createStatement();
         stmt.execute("truncate testcollection");
@@ -391,8 +376,6 @@ public class BatchStatementsUnitTest {
         StringBuilder queryBuilder = new StringBuilder();
 
         for (int i = 0; i < nbRows; i++) {
-            // System.out.println("--- Statement " + i + " ==> INSERT INTO testcollection (k,L)
-            // VALUES( " + i + ",[1, 3, 12345])");
             if (i % 100 == 0) {
                 queryBuilder.append(
                         "INSERT INTO testcollection (k,L,m) VALUES( " + i + ",[1, 3, 12345],1);");

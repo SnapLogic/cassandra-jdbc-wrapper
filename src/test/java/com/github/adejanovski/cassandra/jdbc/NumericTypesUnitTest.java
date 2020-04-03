@@ -40,7 +40,7 @@ public class NumericTypesUnitTest {
     private static final int PORT = Integer
         .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
 
-    private static final String KEYSPACE = "testks";
+    private static final String KEYSPACE = "testks8";
     private static final String SYSTEM = "system";
     private static final String CQLV3 = "3.0.0";
 
@@ -72,7 +72,7 @@ public class NumericTypesUnitTest {
 
         String useKS = String.format("USE %s;", KEYSPACE);
 
-        String dropKS = String.format("DROP KEYSPACE %s;", KEYSPACE);
+        String dropKS = String.format("DROP KEYSPACE \"%s\";", KEYSPACE);
 
         try {
             stmt.execute(dropKS);

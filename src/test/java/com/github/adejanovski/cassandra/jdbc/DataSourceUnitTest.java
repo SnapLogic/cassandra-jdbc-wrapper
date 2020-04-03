@@ -33,7 +33,7 @@ public class DataSourceUnitTest {
     private static String HOST = System.getProperty("host", ConnectionDetails.getHost());
     private static final int PORT = Integer
             .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
-    private static final String KEYSPACE = "testks2";
+    private static final String KEYSPACE = "testks3";
     private static final String USER = "JohnDoe";
     private static final String PASSWORD = "secret";
     private static final String VERSION = "3.0.0";

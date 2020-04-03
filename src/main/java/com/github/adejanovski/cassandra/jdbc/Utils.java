@@ -612,7 +612,9 @@ public class Utils {
 
         if (parameters.length() > 0) {
             // Child policy or parameters have been specified
-            System.out.println("parameters = " + parameters);
+            if (logger.isTraceEnabled())
+                logger.trace("parameters: {}", parameters);
+
             String paramsRegex = "([^,]+\\(.+?\\))|([^,]+)";
             // String lb_regex = "([a-zA-Z]*Policy)(\\()(.*)(\\))";
             Pattern param_pattern = Pattern.compile(paramsRegex);
@@ -771,7 +773,9 @@ public class Utils {
 
         if (parameters.length() > 0) {
             // Child policy or parameters have been specified
-            System.out.println("parameters = " + parameters);
+            if (logger.isTraceEnabled())
+                logger.trace("parameters: {}", parameters);
+
             String paramsRegex = "([^,]+\\(.+?\\))|([^,]+)";
             Pattern param_pattern = Pattern.compile(paramsRegex);
             Matcher lb_matcher = param_pattern.matcher(parameters);

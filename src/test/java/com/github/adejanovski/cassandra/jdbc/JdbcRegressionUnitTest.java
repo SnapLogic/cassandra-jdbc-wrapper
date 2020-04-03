@@ -38,6 +38,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
@@ -51,10 +54,12 @@ import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
 
 public class JdbcRegressionUnitTest {
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcRegressionUnitTest.class);
+
     private static String HOST = System.getProperty("host", ConnectionDetails.getHost());
     private static int PORT = Integer
             .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
-    private static final String KEYSPACE = "testks";
+    private static final String KEYSPACE = "testks5";
     private static final String TABLE = "regressiontest";
     // private static final String CQLV3 = "3.0.0";
     private static final String CONSISTENCY_QUORUM = "QUORUM";
@@ -76,7 +81,8 @@ public class JdbcRegressionUnitTest {
         HOST = CCMBridge.ipOfNode(1);
         Class.forName("com.github.adejanovski.cassandra.jdbc.CassandraDriver");
         String URL = String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, "system");
-        System.out.println("Connection URL = '" + URL + "'");
+
+        LOG.debug("Connection URL = '{}'", URL);
 
         con = DriverManager.getConnection(URL);
         Statement stmt = con.createStatement();
@@ -93,7 +99,7 @@ public class JdbcRegressionUnitTest {
         String createKS = String.format(
                 "CREATE KEYSPACE IF NOT EXISTS \"%s\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};",
                 KEYSPACE);
-        System.out.println("createKS = '" + createKS + "'");
+        LOG.debug("createKS = '{}'", createKS);
         stmt = con.createStatement();
         stmt.execute("USE system;");
         stmt.execute(createKS);
@@ -115,8 +121,6 @@ public class JdbcRegressionUnitTest {
         // open it up again to see the new CF
         con = DriverManager
                 .getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE));
-        System.out.println(con);
-
     }
 
     @AfterClass
@@ -173,22 +177,32 @@ public class JdbcRegressionUnitTest {
 
         int colCount = metadata.getColumnCount();
 
-        System.out.println("Before doing a next()");
-        System.out.printf("(%d) ", result.getRow());
-        for (int i = 1; i <= colCount; i++) {
-            System.out.print(showColumn(i, result) + " ");
-        }
-        System.out.println();
+        LOG.debug("Before doing a next()");
 
-        System.out.println("Fetching each row with a next()");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format("(%d)", result.getRow()));
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i <= colCount; i++) {
+                sb.append(showColumn(i, result)).append(" ");
+            }
+            LOG.debug(sb.toString());
+        }
+
+        LOG.debug("Fetching each row with a next()");
         while (result.next()) {
             metadata = result.getMetaData();
             colCount = metadata.getColumnCount();
-            System.out.printf("(%d) ", result.getRow());
-            for (int i = 1; i <= colCount; i++) {
-                System.out.print(showColumn(i, result) + " ");
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("(%d)", result.getRow()));
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 1; i <= colCount; i++) {
+                    sb.append(showColumn(i, result)).append(" ");
+                }
+                LOG.debug(sb.toString());
             }
-            System.out.println();
         }
     }
 
@@ -218,50 +232,35 @@ public class JdbcRegressionUnitTest {
 
         int colCount = metadata.getColumnCount();
 
-        System.out.println("Test Issue #33");
         DatabaseMetaData md = con.getMetaData();
-        System.out.println();
-        System.out.println("--------------");
-        System.out.println("Driver Version :   " + md.getDriverVersion());
-        System.out.println("DB Version     :   " + md.getDatabaseProductVersion());
-        System.out.println("Catalog term   :   " + md.getCatalogTerm());
-        System.out.println("Catalog        :   " + con.getCatalog());
-        System.out.println("Schema term    :   " + md.getSchemaTerm());
 
-        System.out.println("--------------");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Driver Version :   " + md.getDriverVersion());
+            LOG.debug("DB Version     :   " + md.getDatabaseProductVersion());
+            LOG.debug("Catalog term   :   " + md.getCatalogTerm());
+            LOG.debug("Catalog        :   " + con.getCatalog());
+            LOG.debug("Schema term    :   " + md.getSchemaTerm());
+        }
+
         while (result.next()) {
             metadata = result.getMetaData();
             colCount = metadata.getColumnCount();
-            System.out.printf("(%d) ", result.getRow());
-            for (int i = 1; i <= colCount; i++) {
-                System.out.print(showColumn(i, result) + " ");
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("(%d)", result.getRow()));
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 1; i <= colCount; i++) {
+                    sb.append(showColumn(i, result)).append(" ");
+                }
+                LOG.debug(sb.toString());
             }
-            System.out.println();
         }
     }
 
-    /*
-     * DEACTIVATED BECAUSE ALREADY EXECUTED IN testIssue33 and often fails due to arbitrary order
-     * execution of tests in Junit
-     *
-     * @Test public void testIssue38() throws Exception {
-     *
-     * // test catching exception for beforeFirst() and afterLast() Statement stmt =
-     * con.createStatement();
-     *
-     * ResultSet result = stmt.executeQuery("SELECT * FROM t33;");
-     *
-     * try { result.beforeFirst(); } catch (Exception e) { System.out.println();
-     * System.out.println("beforeFirst() test -> "+ e); }
-     *
-     * }
-     */
     @Test
     public void testIssue40() throws Exception {
         DatabaseMetaData md = con.getMetaData();
-        System.out.println();
-        System.out.println("Test Issue #40");
-        System.out.println("--------------");
 
         // test various retrieval methods
         ResultSet result = md.getTables(con.getCatalog(), null, "%", new String[] { "TABLE" });
@@ -276,7 +275,8 @@ public class JdbcRegressionUnitTest {
         // check the table name
         String tn = result.getString("TABLE_NAME");
         AssertJUnit.assertEquals("Table name match", TABLE, tn);
-        System.out.println("Found table via dmd    :   " + tn);
+
+        LOG.debug("Found table via dmd : {}", tn);
 
         // load the columns
         result = md.getColumns(con.getCatalog(), KEYSPACE, TABLE, null);
@@ -284,17 +284,23 @@ public class JdbcRegressionUnitTest {
         AssertJUnit.assertEquals("Make sure table name match", TABLE,
                 result.getString("TABLE_NAME"));
         String cn = result.getString("COLUMN_NAME");
-        System.out.println("Found (default) PK column       :   " + cn);
+
+        LOG.debug("Found (default) PK column : {}", cn);
+
         AssertJUnit.assertEquals("Column name check", "keyname", cn);
         AssertJUnit.assertEquals("Column type check", Types.VARCHAR, result.getInt("DATA_TYPE"));
         AssertJUnit.assertTrue("Make sure we have found second column", result.next());
         cn = result.getString("COLUMN_NAME");
-        System.out.println("Found column       :   " + cn);
+
+        LOG.debug("Found column : {} ", cn);
+
         AssertJUnit.assertEquals("Column name check", "bvalue", cn);
         AssertJUnit.assertEquals("Column type check", Types.BOOLEAN, result.getInt("DATA_TYPE"));
         AssertJUnit.assertTrue("Make sure we have found thirth column", result.next());
         cn = result.getString("COLUMN_NAME");
-        System.out.println("Found column       :   " + cn);
+
+        LOG.debug("Found column : {}", cn);
+
         AssertJUnit.assertEquals("Column name check", "ivalue", cn);
         AssertJUnit.assertEquals("Column type check", Types.INTEGER, result.getInt("DATA_TYPE"));
 
@@ -326,8 +332,9 @@ public class JdbcRegressionUnitTest {
 
         ResultSet result = statement.executeQuery("SELECT * FROM t59;");
 
-        System.out.println(resultToDisplay(result, 59, null));
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(resultToDisplay(result, 59, null));
+        }
     }
 
     @Test
@@ -352,7 +359,9 @@ public class JdbcRegressionUnitTest {
 
         ResultSet result = statement.executeQuery("SELECT * FROM t65;");
 
-        System.out.println(resultToDisplay(result, 65, "with set = {10,20,30,40}"));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(resultToDisplay(result, 65, "with set = {10,20,30,40}"));
+        }
 
         String update = "UPDATE t65 SET intset=? WHERE key=?;";
 
@@ -365,8 +374,9 @@ public class JdbcRegressionUnitTest {
 
         result = statement.executeQuery("SELECT * FROM t65;");
 
-        System.out.println(resultToDisplay(result, 65, " with set = <empty>"));
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(resultToDisplay(result, 65, " with set = <empty>"));
+        }
     }
 
     @Test
@@ -391,11 +401,7 @@ public class JdbcRegressionUnitTest {
         ConsistencyLevel cl = statementExtras(stmt).getConsistencyLevel();
         AssertJUnit.assertTrue(ConsistencyLevel.QUORUM == cl);
 
-        System.out.println();
-        System.out.println("Test Issue #71");
-        System.out.println("--------------");
-        System.out.println("statement.consistencyLevel = " + cl);
-
+        LOG.debug("statement.consistencyLevel = {}", cl);
     }
 
     @Test
@@ -434,16 +440,13 @@ public class JdbcRegressionUnitTest {
         stamp = (Timestamp) result.getObject(2); // maybe exception here
         AssertJUnit.assertEquals(now, stamp);
 
-        System.out.println(resultToDisplay(result, 74, "current date"));
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(resultToDisplay(result, 74, "current date"));
+        }
     }
 
     @Test
     public void testIssue75() throws Exception {
-        System.out.println();
-        System.out.println("Test Issue #75");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
 
         String truncate = "TRUNCATE regressiontest;";
@@ -456,17 +459,15 @@ public class JdbcRegressionUnitTest {
         ResultSetMetaData rsmd = result.getMetaData();
         AssertJUnit.assertTrue("Make sure we do get a result", rsmd.getColumnDisplaySize(1) != 0);
         AssertJUnit.assertNotNull("Make sure we do get a label", rsmd.getColumnLabel(1));
-        System.out.println("Found a column in ResultsetMetaData even when there are no rows:   "
-                + rsmd.getColumnLabel(1));
+
+        LOG.debug("Found a column in ResultsetMetaData even when there are no rows: {}", rsmd.getColumnLabel(1));
+
         stmt.close();
     }
 
     @Test
     public void testIssue76() throws Exception {
         DatabaseMetaData md = con.getMetaData();
-        System.out.println();
-        System.out.println("Test Issue #76");
-        System.out.println("--------------");
 
         // test various retrieval methods
         ResultSet result = md.getIndexInfo(con.getCatalog(), KEYSPACE, TABLE, false, false);
@@ -475,15 +476,12 @@ public class JdbcRegressionUnitTest {
         // check the column name from index
         String cn = result.getString("COLUMN_NAME");
         AssertJUnit.assertEquals("Column name match for index", "ivalue", cn);
-        System.out.println("Found index via dmd on :   " + cn);
+        LOG.debug("Found index via dmd on : {}", cn);
     }
 
     @Test
     public void testIssue77() throws Exception {
         DatabaseMetaData md = con.getMetaData();
-        System.out.println();
-        System.out.println("Test Issue #77");
-        System.out.println("--------------");
 
         // test various retrieval methods
         ResultSet result = md.getPrimaryKeys(con.getCatalog(), KEYSPACE, TABLE);
@@ -492,7 +490,8 @@ public class JdbcRegressionUnitTest {
         // check the column name from index
         String cn = result.getString("COLUMN_NAME");
         AssertJUnit.assertEquals("Column name match for pk", "keyname", cn);
-        System.out.println("Found pk via dmd :   " + cn);
+
+        LOG.debug("Found pk via dmd : {}", cn);
     }
 
     @Test
@@ -506,11 +505,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testIssue80() throws Exception {
-
-        System.out.println();
-        System.out.println("Test Issue #80");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         java.util.Date now = new java.util.Date();
 
@@ -527,10 +521,12 @@ public class JdbcRegressionUnitTest {
         // open it up again to see the new CF
         con = DriverManager.getConnection(
                 String.format("jdbc:cassandra://%s:%d/%s?debug=true", HOST, PORT, KEYSPACE));
-        System.out.println("con.getMetaData().getDatabaseProductName() = "
-                + con.getMetaData().getDatabaseProductName());
-        System.out.println(
-                "con.getMetaData().getDriverName() = " + con.getMetaData().getDriverName());
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("con.getMetaData().getDatabaseProductName() = " + con.getMetaData().getDatabaseProductName());
+            LOG.debug("con.getMetaData().getDriverName() = " + con.getMetaData().getDriverName());
+        }
+
         Statement statement = con.createStatement();
         /*
          * INSERT INTO test.t80(bigint_col , ascii_col , blob_col , boolean_col , decimal_col ,
@@ -669,7 +665,9 @@ public class JdbcRegressionUnitTest {
         AssertJUnit.assertTrue(retList instanceof ArrayList);
         AssertJUnit.assertEquals(2, retList.size());
         retMap = (Map<String, String>) result.getObject("string_map_col");
-        System.out.println("HashMap ??? " + retMap);
+
+        LOG.debug("HashMap? {}", retMap);
+
         AssertJUnit.assertTrue(retMap instanceof HashMap);
         AssertJUnit.assertEquals(2, retMap.keySet().size());
 
@@ -680,11 +678,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testIssue102() throws Exception {
-        // null int or long should be... null !
-        System.out.println();
-        System.out.println("Test Issue #102");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         // java.util.Date now = new java.util.Date();
 
@@ -700,10 +693,14 @@ public class JdbcRegressionUnitTest {
         con = DriverManager.getConnection(String.format(
                 "jdbc:cassandra://%s:%d/%s?loadbalancing=TokenAwarePolicy(RoundRobinPolicy())",
                 HOST, PORT, KEYSPACE));
-        System.out.println("con.getMetaData().getDatabaseProductName() = "
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("con.getMetaData().getDatabaseProductName() = "
                 + con.getMetaData().getDatabaseProductName());
-        System.out.println(
-                "con.getMetaData().getDriverName() = " + con.getMetaData().getDriverName());
+
+            LOG.debug("con.getMetaData().getDriverName() = "
+                + con.getMetaData().getDriverName());
+        }
         Statement statement = con.createStatement();
         /*
          * INSERT INTO test.t80(bigint_col , ascii_col , blob_col , boolean_col , decimal_col ,
@@ -727,7 +724,9 @@ public class JdbcRegressionUnitTest {
 
         AssertJUnit.assertTrue(result.next());
         AssertJUnit.assertEquals(1L, result.getLong("bigint_col"));
-        System.out.println("null_bigint_col = " + result.getLong("null_bigint_col"));
+
+        LOG.debug("null_bigint_col = {}", result.getLong("null_bigint_col"));
+
         AssertJUnit.assertEquals(0L, result.getLong("null_bigint_col"));
         AssertJUnit.assertTrue(result.wasNull());
         AssertJUnit.assertEquals(0, result.getInt("null_int_col"));
@@ -740,76 +739,11 @@ public class JdbcRegressionUnitTest {
 
     }
 
-    /*
-     * @Test public void testUDTandTuple() throws Exception { // Work with UDT - only in Cassandra
-     * 2.1+ if(!System.getProperty("cassandra.version").startsWith("1") &&
-     * !System.getProperty("cassandra.version").startsWith("2.0")){ System.out.println();
-     * System.out.println("Test UDT and Tuple"); System.out.println("--------------");
-     *
-     * Statement stmt = con.createStatement(); //java.util.Date now = new java.util.Date();
-     *
-     *
-     * // Create the target Column family with each basic data type available on Cassandra
-     *
-     * String createUDT = "CREATE TYPE IF NOT EXISTS fieldmap (key text, value text )"; String
-     * createCF =
-     * "CREATE COLUMNFAMILY t_udt (id bigint PRIMARY KEY, field_values frozen<fieldmap>, the_tuple frozen<tuple<int, text, float>>, the_other_tuple frozen<tuple<int, text, float>>);"
-     * ; stmt.execute(createUDT); stmt.execute(createCF); stmt.close();
-     *
-     * System.out.println("con.getMetaData().getDatabaseProductName() = " +
-     * con.getMetaData().getDatabaseProductName());
-     * System.out.println("con.getMetaData().getDatabaseProductVersion() = " +
-     * con.getMetaData().getDatabaseProductVersion());
-     * System.out.println("con.getMetaData().getDriverName() = " +
-     * con.getMetaData().getDriverName()); Statement statement = con.createStatement();
-     *
-     *
-     *
-     * String insert =
-     * "INSERT INTO t_udt(id, field_values, the_tuple, the_other_tuple) values(?,{key : ?, value : ?}, (?,?,?),?);"
-     * ;
-     *
-     *
-     * TupleValue t = TupleType.of(ProtocolVersion.V4,
-     * con.cluster.getConfiguration().getCodecRegistry(), DataType.cint(), DataType.text(),
-     * DataType.cfloat()).newValue(); t.setInt(0, 1).setString(1, "midVal").setFloat(2, (float)2.0);
-     *
-     * PreparedStatement pstatement = con.prepareStatement(insert);
-     *
-     *
-     * pstatement.setObject(1, 1L); // bigint
-     *
-     * pstatement.setString(2, "key1"); pstatement.setString(3, "value1"); pstatement.setInt(4, 1);
-     * pstatement.setString(5, "midVal"); pstatement.setFloat(6, (float) 2.0);
-     * pstatement.setObject(7, (Object)t);
-     *
-     *
-     * pstatement.execute();
-     *
-     * ResultSet result = statement.executeQuery("SELECT * FROM t_udt;");
-     *
-     * assert(result.next()==true); Assert.assertEquals(1L, result.getLong("id")); UDTValue udtVal =
-     * (UDTValue) result.getObject("field_values"); Assert.assertEquals(udtVal.getString("key"),
-     * "key1"); Assert.assertEquals(udtVal.getString("value"), "value1");
-     *
-     * TupleValue tupleVal = (TupleValue) result.getObject("the_tuple");
-     * Assert.assertEquals(tupleVal.getInt(0), 1); Assert.assertEquals(tupleVal.getString(1),
-     * "midVal"); Assert.assertEquals(tupleVal.getFloat(2), (float) 2.0);
-     *
-     *
-     * statement.close(); pstatement.close(); }
-     *
-     * }
-     */
-
     @Test
     public void testUDTandTuple_collections() throws Exception {
         // Work with UDT - only in Cassandra 2.1+
         if (!System.getProperty("cassandra.version").startsWith("1")
                 && !System.getProperty("cassandra.version").startsWith("2.0")) {
-            System.out.println();
-            System.out.println("Test UDT and Tuple in collections");
-            System.out.println("--------------");
 
             Statement stmt = con.createStatement();
             // java.util.Date now = new java.util.Date();
@@ -822,12 +756,16 @@ public class JdbcRegressionUnitTest {
             stmt.execute(createCF);
             stmt.close();
 
-            System.out.println("con.getMetaData().getDatabaseProductName() = "
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("con.getMetaData().getDatabaseProductName() = "
                     + con.getMetaData().getDatabaseProductName());
-            System.out.println("con.getMetaData().getDatabaseProductVersion() = "
+
+                LOG.debug("con.getMetaData().getDatabaseProductVersion() = "
                     + con.getMetaData().getDatabaseProductVersion());
-            System.out.println(
-                    "con.getMetaData().getDriverName() = " + con.getMetaData().getDriverName());
+
+                LOG.debug("con.getMetaData().getDriverName() = " 
+                    + con.getMetaData().getDriverName());
+            }
             Statement statement = con.createStatement();
 
             String insert = "INSERT INTO t_udt_tuple_coll(id,field_values,the_tuple, field_values_map, tuple_map) values(1,{{key : 'key1', value : 'value1'},{key : 'key2', value : 'value2'}}, [(1, 'midVal1', 1.0),(2, 'midVal2', 2.0)], {'map_key1':{key : 'key1', value : 'value1'},'map_key2':{key : 'key2', value : 'value2'}}, {'tuple1':(1, 2),'tuple2':(2,3)} );";
@@ -881,11 +819,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testGetLongGetDouble() throws Exception {
-        // null int or long should be... null !
-        System.out.println();
-        System.out.println("Test getLong on int/varint and getDouble on float #102");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         // java.util.Date now = new java.util.Date();
 
@@ -895,7 +828,6 @@ public class JdbcRegressionUnitTest {
 
         stmt.execute(createCF);
         stmt.close();
-        // con.close();
 
         // open it up again to see the new CF
         // con =
@@ -977,10 +909,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testTimestampToLongCodec() throws Exception {
-        System.out.println();
-        System.out.println("Test testTimestampToLongCodec");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         java.util.Date now = new java.util.Date();
 
@@ -1016,10 +944,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testSetToNullUnsetParams() throws Exception {
-        System.out.println();
-        System.out.println("Test testSetToNullUnsetParams");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         java.util.Date now = new java.util.Date();
 
@@ -1054,11 +978,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testBlob() throws Exception {
-
-        System.out.println();
-        System.out.println("Test Blob");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         java.util.Date now = new java.util.Date();
 
@@ -1113,10 +1032,6 @@ public class JdbcRegressionUnitTest {
 
     @Test
     public void testSnap6249() throws Exception {
-        System.out.println();
-        System.out.println("Test Issue SNAP-6249");
-        System.out.println("--------------------");
-
         Statement stmt = con.createStatement();
 
         String createCF = "CREATE COLUMNFAMILY tblPosition (" +

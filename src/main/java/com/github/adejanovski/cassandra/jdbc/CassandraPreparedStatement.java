@@ -84,8 +84,8 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
             int rsHoldability) throws SQLException {
         super(con, cql, rsType, rsConcurrency, rsHoldability);
 
-        if (LOG.isTraceEnabled())
-            LOG.trace("CQL: " + this.cql);
+        LOG.trace("CQL: {}", this.cql);
+
         try {
             stmt = this.connection.getSession().prepare(cql);
             this.statement = new BoundStatement(stmt);
@@ -120,12 +120,10 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
     }
 
     private void doExecute() throws SQLException {
-        if (LOG.isTraceEnabled())
-            LOG.trace("CQL: " + cql);
+        LOG.trace("CQL: {}", cql);
+
         try {
             resetResults();
-            if (this.connection.debugMode)
-                System.out.println("CQL: " + cql);
             if (this.statement.getFetchSize() == 0)
                 // force paging to avoid timeout and node harm...
                 this.statement.setFetchSize(100);
@@ -156,8 +154,9 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
         int[] returnCounts = new int[batchStatements.size()];
         try {
             List<ResultSetFuture> futures = new ArrayList<ResultSetFuture>();
-            if (this.connection.debugMode)
-                System.out.println("CQL statements : " + batchStatements.size());
+
+            LOG.trace("# BatchStatements: {}", batchStatements.size());
+
             for (BoundStatement q : batchStatements) {
                 for (int i = 0; i < q.preparedStatement().getVariables().size(); i++) {
                     // Set parameters to null if unset
@@ -165,8 +164,8 @@ class CassandraPreparedStatement extends CassandraStatement implements PreparedS
                         q.setToNull(i);
                     }
                 }
-                if (this.connection.debugMode)
-                    System.out.println("CQL: " + cql);
+                LOG.trace("CQL: {}", cql);
+
                 q.setConsistencyLevel(this.connection.defaultConsistencyLevel);
 
                 ResultSetFuture resultSetFuture = this.connection.getSession().executeAsync(q);

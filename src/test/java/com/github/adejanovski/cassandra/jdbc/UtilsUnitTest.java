@@ -107,76 +107,64 @@ public class UtilsUnitTest {
     @Test
     public void testLoadBalancingPolicyParsing() throws Exception {
         String lbPolicyStr = "RoundRobinPolicy()";
-        System.out.println(lbPolicyStr);
+        LOG.debug(lbPolicyStr);
         assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof RoundRobinPolicy);
-        System.out.println("====================");
-        lbPolicyStr = "TokenAwarePolicy(RoundRobinPolicy())";
-        System.out.println(lbPolicyStr);
-        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof TokenAwarePolicy);
-        System.out.println("====================");
-        lbPolicyStr = "DCAwareRoundRobinPolicy(\"dc1\")";
-        System.out.println(lbPolicyStr);
-        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof DCAwareRoundRobinPolicy);
-        System.out.println("====================");
-        lbPolicyStr = "TokenAwarePolicy(DCAwareRoundRobinPolicy(\"dc1\"))";
-        System.out.println(lbPolicyStr);
-        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof TokenAwarePolicy);
-        System.out.println("====================");
-        lbPolicyStr = "TokenAwarePolicy";
-        System.out.println(lbPolicyStr);
-        assertTrue(Utils.parseLbPolicy(lbPolicyStr) == null);
-        System.out.println("====================");
-        lbPolicyStr = "LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double) 10.5,(long) 1,(long) 10,(long)1,10)";
-        System.out.println(lbPolicyStr);
-        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof LatencyAwarePolicy);
-        System.out.println("====================");
 
+        lbPolicyStr = "TokenAwarePolicy(RoundRobinPolicy())";
+        LOG.debug(lbPolicyStr);
+        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof TokenAwarePolicy);
+
+        lbPolicyStr = "DCAwareRoundRobinPolicy(\"dc1\")";
+        LOG.debug(lbPolicyStr);
+        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof DCAwareRoundRobinPolicy);
+
+        lbPolicyStr = "TokenAwarePolicy(DCAwareRoundRobinPolicy(\"dc1\"))";
+        LOG.debug(lbPolicyStr);
+        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof TokenAwarePolicy);
+
+        lbPolicyStr = "TokenAwarePolicy";
+        LOG.debug(lbPolicyStr);
+        assertTrue(Utils.parseLbPolicy(lbPolicyStr) == null);
+
+        lbPolicyStr = "LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double) 10.5,(long) 1,(long) 10,(long)1,10)";
+        LOG.debug(lbPolicyStr);
+        assertTrue(Utils.parseLbPolicy(lbPolicyStr) instanceof LatencyAwarePolicy);
     }
 
     @Test
     public void testRetryPolicyParsing() throws Exception {
         String retryPolicyStr = "DefaultRetryPolicy";
-        System.out.println(retryPolicyStr);
+        LOG.debug(retryPolicyStr);
         assertTrue(Utils.parseRetryPolicy(retryPolicyStr) instanceof DefaultRetryPolicy);
-        System.out.println("====================");
-        retryPolicyStr = "DowngradingConsistencyRetryPolicy";
-        System.out.println(retryPolicyStr);
-        assertTrue(Utils
-                .parseRetryPolicy(retryPolicyStr) instanceof DowngradingConsistencyRetryPolicy);
-        System.out.println("====================");
-        retryPolicyStr = "FallthroughRetryPolicy";
-        System.out.println(retryPolicyStr);
-        assertTrue(Utils.parseRetryPolicy(retryPolicyStr) instanceof FallthroughRetryPolicy);
-        System.out.println("====================");
 
+        retryPolicyStr = "DowngradingConsistencyRetryPolicy";
+        LOG.debug(retryPolicyStr);
+        assertTrue(Utils.parseRetryPolicy(retryPolicyStr) instanceof DowngradingConsistencyRetryPolicy);
+
+        retryPolicyStr = "FallthroughRetryPolicy";
+        LOG.debug(retryPolicyStr);
+        assertTrue(Utils.parseRetryPolicy(retryPolicyStr) instanceof FallthroughRetryPolicy);
     }
 
     @Test
     public void testReconnectionPolicyParsing() throws Exception {
         String retryPolicyStr = "ConstantReconnectionPolicy((long)10)";
-        System.out.println(retryPolicyStr);
-        assertTrue(Utils
-                .parseReconnectionPolicy(retryPolicyStr) instanceof ConstantReconnectionPolicy);
-        System.out.println("====================");
-        retryPolicyStr = "ExponentialReconnectionPolicy((long)10,(Long)100)";
-        System.out.println(retryPolicyStr);
-        assertTrue(Utils
-                .parseReconnectionPolicy(retryPolicyStr) instanceof ExponentialReconnectionPolicy);
-        System.out.println("====================");
+        LOG.debug(retryPolicyStr);
+        assertTrue(Utils.parseReconnectionPolicy(retryPolicyStr) instanceof ConstantReconnectionPolicy);
 
+        retryPolicyStr = "ExponentialReconnectionPolicy((long)10,(Long)100)";
+        LOG.debug(retryPolicyStr);
+        assertTrue(Utils.parseReconnectionPolicy(retryPolicyStr) instanceof ExponentialReconnectionPolicy);
     }
 
     @Test
     public void testCreateSubName() throws Exception {
         String happypath = "jdbc:cassandra://localhost:9042/Keyspace1?consistency=QUORUM&version=3.0.0";
         Properties props = Utils.parseURL(happypath);
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("happypath    = '{}'", happypath);
+        LOG.debug("happypath = '{}'", happypath);
 
         String result = Utils.createSubName(props);
-        if (LOG.isDebugEnabled())
-            LOG.debug("result       = '{}'", Utils.PROTOCOL + result);
+        LOG.debug("result = '{}'", Utils.PROTOCOL + result);
 
         assertEquals(happypath, Utils.PROTOCOL + result);
     }

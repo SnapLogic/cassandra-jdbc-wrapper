@@ -23,16 +23,21 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class MetadataResultSetsUnitTest {
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataResultSetsUnitTest.class);
+
     private static String HOST = System.getProperty("host", ConnectionDetails.getHost());
     private static final int PORT = Integer
             .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
-    private static final String KEYSPACE1 = "testks1";
-    private static final String KEYSPACE2 = "testks2";
+    private static final String KEYSPACE1 = "testks6";
+    private static final String KEYSPACE2 = "testks7";
     private static final String DROP_KS = "DROP KEYSPACE \"%s\";";
     private static final String CREATE_KS = "CREATE KEYSPACE IF NOT EXISTS \"%s\" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};";
 
@@ -56,7 +61,9 @@ public class MetadataResultSetsUnitTest {
 
         Class.forName("com.github.adejanovski.cassandra.jdbc.CassandraDriver");
         String URL = String.format("jdbc:cassandra://%s:%d/%s?version=3.0.0", HOST, PORT, "system");
-        System.out.println("Connection URL = '" + URL + "'");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Connection URL = '" + URL + "'");
+        }
 
         con = DriverManager.getConnection(URL);
         Statement stmt = con.createStatement();
@@ -158,9 +165,7 @@ public class MetadataResultSetsUnitTest {
         CassandraStatement statement = (CassandraStatement) con.createStatement();
         ResultSet result = MetadataResultSets.instance.makeTableTypes(statement);
 
-        System.out.println("--- testTableType() ---");
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
     }
 
     @Test
@@ -168,9 +173,7 @@ public class MetadataResultSetsUnitTest {
         CassandraStatement statement = (CassandraStatement) con.createStatement();
         ResultSet result = MetadataResultSets.instance.makeCatalogs(statement);
 
-        System.out.println("--- testCatalogs() ---");
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
     }
 
     @Test
@@ -178,15 +181,13 @@ public class MetadataResultSetsUnitTest {
         CassandraStatement statement = (CassandraStatement) con.createStatement();
         ResultSet result = MetadataResultSets.instance.makeSchemas(statement, null);
 
-        System.out.println("--- testSchemas() ---");
-        System.out.println(getColumnNames(result.getMetaData()));
-
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(getColumnNames(result.getMetaData()));
+            LOG.debug(toString(result));
+        }
 
         result = MetadataResultSets.instance.makeSchemas(statement, KEYSPACE2);
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
     }
 
     @Test
@@ -194,23 +195,19 @@ public class MetadataResultSetsUnitTest {
         CassandraStatement statement = (CassandraStatement) con.createStatement();
         ResultSet result = MetadataResultSets.instance.makeTables(statement, null, null);
 
-        System.out.println("--- testTables() ---");
-        System.out.println(getColumnNames(result.getMetaData()));
-
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(getColumnNames(result.getMetaData()));
+            LOG.debug(toString(result));
+        }
 
         result = MetadataResultSets.instance.makeTables(statement, KEYSPACE2, null);
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
 
         result = MetadataResultSets.instance.makeTables(statement, null, "test1");
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
 
         result = MetadataResultSets.instance.makeTables(statement, KEYSPACE2, "test1");
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) LOG.debug(toString(result));
     }
 
     @Test
@@ -219,19 +216,17 @@ public class MetadataResultSetsUnitTest {
         ResultSet result = MetadataResultSets.instance.makeColumns(statement, KEYSPACE1, "test1",
                 null);
 
-        System.out.println("--- testColumns() ---");
-        System.out.println(getColumnNames(result.getMetaData()));
-
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(getColumnNames(result.getMetaData()));
+            LOG.debug(toString(result));
+        }
 
         result = MetadataResultSets.instance.makeColumns(statement, KEYSPACE1, "test2", null);
 
-        System.out.println("--- testColumns() ---");
-        System.out.println(getColumnNames(result.getMetaData()));
-
-        System.out.println(toString(result));
-        System.out.println();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(getColumnNames(result.getMetaData()));
+            LOG.debug(toString(result));
+        }
 
         // verify DECIMAL_DIGITS column data doesn't return null which bubbles
         // up as a NumberFormatException. This column data is queried by
@@ -241,11 +236,6 @@ public class MetadataResultSetsUnitTest {
 
     @Test
     public void testCollectionsMetadata() throws Exception {
-
-        System.out.println();
-        System.out.println("Collections metadata test");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
         // java.util.Date now = new java.util.Date();
 
@@ -267,21 +257,21 @@ public class MetadataResultSetsUnitTest {
 
         assertTrue(result.next());
         assertEquals(5, result.getMetaData().getColumnCount());
-        for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
-            System.out.println("getColumnName : " + result.getMetaData().getColumnName(i));
-            System.out.println("getCatalogName : " + result.getMetaData().getCatalogName(i));
-            System.out
-                    .println("getColumnClassName : " + result.getMetaData().getColumnClassName(i));
-            System.out.println(
-                    "getColumnDisplaySize : " + result.getMetaData().getColumnDisplaySize(i));
-            System.out.println("getColumnLabel : " + result.getMetaData().getColumnLabel(i));
-            System.out.println("getColumnType : " + result.getMetaData().getColumnType(i));
-            System.out.println("getColumnTypeName : " + result.getMetaData().getColumnTypeName(i));
-            System.out.println("getPrecision : " + result.getMetaData().getPrecision(i));
-            System.out.println("getScale : " + result.getMetaData().getScale(i));
-            System.out.println("getSchemaName : " + result.getMetaData().getSchemaName(i));
-            System.out.println("getTableName : " + result.getMetaData().getTableName(i));
-            System.out.println("==========================");
+
+        if (LOG.isDebugEnabled()) {
+            for (int i = 1; i <= result.getMetaData().getColumnCount(); i++) {
+                LOG.debug("getColumnName : " + result.getMetaData().getColumnName(i));
+                LOG.debug("getCatalogName : " + result.getMetaData().getCatalogName(i));
+                LOG.debug("getColumnClassName : " + result.getMetaData().getColumnClassName(i));
+                LOG.debug("getColumnDisplaySize : " + result.getMetaData().getColumnDisplaySize(i));
+                LOG.debug("getColumnLabel : " + result.getMetaData().getColumnLabel(i));
+                LOG.debug("getColumnType : " + result.getMetaData().getColumnType(i));
+                LOG.debug("getColumnTypeName : " + result.getMetaData().getColumnTypeName(i));
+                LOG.debug("getPrecision : " + result.getMetaData().getPrecision(i));
+                LOG.debug("getScale : " + result.getMetaData().getScale(i));
+                LOG.debug("getSchemaName : " + result.getMetaData().getSchemaName(i));
+                LOG.debug("getTableName : " + result.getMetaData().getTableName(i));
+            }
         }
 
         // columns are apparently ordered alphabetically and not according to the query order
@@ -321,11 +311,6 @@ public class MetadataResultSetsUnitTest {
 
     @Test
     public void testNumericTypesMetadata() throws Exception {
-
-        System.out.println();
-        System.out.println("Numeric Types metadata test");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
 
         String createNumericTypesTable = "CREATE TABLE " + KEYSPACE1
@@ -461,11 +446,6 @@ public class MetadataResultSetsUnitTest {
 
     @Test
     public void testDateTimeTypesMetadata() throws Exception {
-
-        System.out.println();
-        System.out.println("DateTime Types metadata test");
-        System.out.println("--------------");
-
         Statement stmt = con.createStatement();
 
         String createDateTimeTypesTable = "CREATE TABLE " + KEYSPACE1

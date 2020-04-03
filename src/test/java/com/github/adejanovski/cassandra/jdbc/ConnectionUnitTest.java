@@ -20,6 +20,9 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLNonTransientException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,6 +30,8 @@ import org.testng.annotations.Test;
 //import com.datastax.driver.core.CCMBridge;
 
 public class ConnectionUnitTest {
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionUnitTest.class);
+
     private static String HOST = System.getProperty("host", ConnectionDetails.getHost());
     private static int PORT = Integer
             .parseInt(System.getProperty("port", ConnectionDetails.getPort() + ""));
@@ -65,46 +70,52 @@ public class ConnectionUnitTest {
 
     @Test
     public void loadBalancingPolicyTest() throws SQLException {
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
                 PORT, KEYSPACE + "?debug=true&loadbalancing=RoundRobinPolicy()"));
-        System.out.println("Con1...");
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&loadbalancing=RoundRobinPolicy()"));
-        System.out.println("Con2...");
+       
         Connection con2 = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s",
                 HOST, PORT, KEYSPACE + "?debug=true&loadbalancing=RoundRobinPolicy()"));
         con2.close();
         con.close();
 
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
                 PORT, KEYSPACE + "?debug=true&loadbalancing=TokenAwarePolicy(RoundRobinPolicy())"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&loadbalancing=TokenAwarePolicy(RoundRobinPolicy())"));
         con.close();
 
-        System.out.println("Connecting to : " + String.format(
-            "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=DCAwareRoundRobinPolicy('%s')",
-            HOST, PORT, KEYSPACE, DATACENTER));
-
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format(
+                "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=DCAwareRoundRobinPolicy('%s')",
+                    HOST, PORT, KEYSPACE, DATACENTER));
+        }
         con = DriverManager.getConnection(String.format(
             "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=DCAwareRoundRobinPolicy('%s')",
             HOST, PORT, KEYSPACE, DATACENTER));
 
         con.close();
 
-        System.out.println( "Connecting to : " + String.format(
-            "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=TokenAwarePolicy(DCAwareRoundRobinPolicy('%s'))",
-            HOST, PORT, KEYSPACE, DATACENTER));
-
+        if (logger.isDebugEnabled()) {
+            logger.debug( "Connecting to : " + String.format(
+                "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=TokenAwarePolicy(DCAwareRoundRobinPolicy('%s'))",
+                    HOST, PORT, KEYSPACE, DATACENTER));
+        }
         con = DriverManager.getConnection(String.format(
             "jdbc:cassandra://%s:%d/%s?debug=true&loadbalancing=TokenAwarePolicy(DCAwareRoundRobinPolicy('%s'))",
             HOST, PORT, KEYSPACE, DATACENTER));
 
         con.close();
 
-        System.out.println(
-                "Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
-                        + "?debug=true&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(long)1,10)"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
+                + "?debug=true&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(long)1,10)"));
+        }
         con = DriverManager
                 .getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
                         + "?debug=true&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(long)1,10)"));
@@ -114,9 +125,10 @@ public class ConnectionUnitTest {
 
     @Test(expectedExceptions = SQLNonTransientException.class)
     public void latencyAwarePolicyFailTest() throws SQLException {
-        System.out.println(
-                "Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
-                        + "?debug=true&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(int)1,10)"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
+                + "?debug=true&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(int)1,10)"));
+        }
         con = DriverManager
                 .getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
                         + "?debug=true&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(int)1,10)"));
@@ -125,9 +137,10 @@ public class ConnectionUnitTest {
 
     @Test
     public void latencyAwarePolicyFailPassTest() throws SQLException {
-        System.out.println(
-                "Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
-                        + "?debug=false&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(int)1,10)"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
+                + "?debug=false&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(int)1,10)"));
+        }
         con = DriverManager
                 .getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
                         + "?debug=false&loadbalancing=LatencyAwarePolicy(TokenAwarePolicy(RoundRobinPolicy()),(double)10.5,(long)1,(long)10,(int)1,10)"));
@@ -136,21 +149,26 @@ public class ConnectionUnitTest {
 
     @Test
     public void retryPolicyTest() throws SQLException {
-
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
-                PORT, KEYSPACE + "?debug=true&retry=DefaultRetryPolicy"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&retry=DefaultRetryPolicy"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&retry=DefaultRetryPolicy"));
         con.close();
 
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
-                PORT, KEYSPACE + "?debug=true&retry=DowngradingConsistencyRetryPolicy"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&retry=DowngradingConsistencyRetryPolicy"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&retry=DowngradingConsistencyRetryPolicy"));
         con.close();
 
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
-                PORT, KEYSPACE + "?debug=true&retry=FallthroughRetryPolicy"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&retry=FallthroughRetryPolicy"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&retry=FallthroughRetryPolicy"));
         con.close();
@@ -159,9 +177,10 @@ public class ConnectionUnitTest {
 
     @Test(expectedExceptions = SQLNonTransientException.class)
     public void retryPolicyFailTest() throws SQLException {
-
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
-                PORT, KEYSPACE + "?debug=true&retry=RetryFakePolicy"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&retry=RetryFakePolicy"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&retry=RetryFakePolicy"));
         con.close();
@@ -170,15 +189,18 @@ public class ConnectionUnitTest {
 
     @Test
     public void reconnectionPolicyTest() throws SQLException {
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
-                PORT, KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((long)10)"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((long)10)"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((long)10)"));
         con.close();
 
-        System.out.println(
-                "Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
-                        + "?debug=true&reconnection=ExponentialReconnectionPolicy((long)10,(long)100)"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&reconnection=ExponentialReconnectionPolicy((long)10,(long)100)"));
+        }
         con = DriverManager
                 .getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT, KEYSPACE
                         + "?debug=true&reconnection=ExponentialReconnectionPolicy((long)10,(long)100)"));
@@ -188,9 +210,10 @@ public class ConnectionUnitTest {
 
     @Test(expectedExceptions = SQLNonTransientException.class)
     public void reconnectionPolicyFailTest() throws SQLException {
-
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", HOST,
-                PORT, KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((int)10)"));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s:%d/%s", 
+                HOST, PORT, KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((int)10)"));
+        }
         con = DriverManager.getConnection(String.format("jdbc:cassandra://%s:%d/%s", HOST, PORT,
                 KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((int)10)"));
         con.close();
@@ -199,9 +222,10 @@ public class ConnectionUnitTest {
 
     @Test
     public void connectionFailTest() throws SQLException {
-
-        System.out.println("Connecting to : " + String.format("jdbc:cassandra://%s1:%d/%s", HOST,
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connecting to : " + String.format("jdbc:cassandra://%s1:%d/%s", HOST,
                 PORT, KEYSPACE + "?debug=true&reconnection=ConstantReconnectionPolicy((long)10)"));
+        }
         try {
             con = DriverManager.getConnection(String.format("jdbc:cassandra://%s1:%d/%s", HOST,
                     PORT,
