@@ -4,7 +4,7 @@
   <groupId>com.snaplogic</groupId>
   <artifactId>cassandra-jdbc-wrapper</artifactId>
   <name>Cassandra JDBC Wrapper</name>
-  <version>3.7.0</version>
+  <version>3.7.1</version>
   <description>JDBC wrapper for the DataStax CQL Java Driver. The version number
 		matches the required version number of the datastax jars. Do not
 		mix them - you'll get ClassNotFoundExceptions if you do!</description>

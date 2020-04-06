@@ -5,7 +5,7 @@
 
 	<groupId>com.snaplogic</groupId>
 	<artifactId>cassandra-jdbc-wrapper</artifactId>
-	<version>3.7.0</version>
+	<version>3.7.1</version>
 
 	<packaging>jar</packaging>
 	<name>Cassandra JDBC Wrapper</name>
