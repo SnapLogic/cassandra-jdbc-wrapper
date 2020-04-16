@@ -1087,6 +1087,69 @@ public class JdbcRegressionUnitTest {
         stmt.close();
     }
 
+    @Test
+    public void testSnap6617() throws Exception {
+        Statement stmt = con.createStatement();
+
+        String createCF = "CREATE COLUMNFAMILY testSnap6617 (userid text PRIMARY KEY, ts timestamp, todo map<timestamp, text>);";
+        stmt.execute(createCF);
+        stmt.close();
+        con.close();
+
+        // open it up again to see the new CF
+        con = DriverManager.getConnection(String.format(
+                "jdbc:cassandra://%s:%d/%s?loadbalancing=TokenAwarePolicy(RoundRobinPolicy())",
+                HOST, PORT, KEYSPACE));
+
+        stmt = con.createStatement();
+
+        String TIMESTAMP = "2013-09-22T12:01:00.000+0000";
+
+        String insert = String.format(
+            "INSERT INTO testSnap6617 (userid, ts, todo) VALUES ('a', '%s', {'%s': 'text'});",
+            TIMESTAMP, TIMESTAMP);
+        stmt.execute(insert);
+
+        ResultSet result = stmt.executeQuery("SELECT * FROM testSnap6617;");
+
+        Assert.assertTrue(result.next());
+
+        // columns ordered alphabetically, key column first
+        // (ie, [1] userid, [2] map, [3] ts)
+
+        Assert.assertEquals(result.getString("userid"), "a");
+
+        // lookup timestamp via generic & specific getters, and by index & by name.
+
+        List<Timestamp> timestamps = new ArrayList<>();
+        timestamps.add((Timestamp) result.getObject(3));
+        timestamps.add((Timestamp) result.getObject("ts"));
+        timestamps.add(result.getTimestamp(3));
+        timestamps.add(result.getTimestamp("ts"));
+
+        for (Timestamp ts : timestamps) {
+            Assert.assertEquals(ts.getTime(), Utils.parseTimestamp(TIMESTAMP).getTime());
+        }
+
+        // lookup map ctype with timestamp as key
+
+        try {
+            result.getObject("todo");
+            Assert.fail();
+        }
+        catch (com.datastax.driver.core.exceptions.CodecNotFoundException expected) {
+            // TODO: once this bug has been fixed, remove try/catch block and
+            // assert on the values. Note that this error message is generated 
+            // by the DataStax jdbc driver.
+
+            AssertJUnit.assertTrue(expected.getMessage().contains(
+                "Codec not found for requested operation: [timestamp <-> java.sql.Timestamp]"));
+        }
+
+        stmt.close();
+    }
+
+
     private final String showColumn(int index, ResultSet result) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("[").append(index).append("]");
